@@ -17,7 +17,6 @@ $capsule->bootEloquent();
 
 // Get the ReactPHP event loop
 $loop = Factory::create();
-
 // Function to rotate the playlist
 function rotatePlaylist()
 {
@@ -52,6 +51,17 @@ function rotatePlaylist()
         if (empty($videoDetail['status']) || empty($videoDetail['contentDetails'])) {
             continue;
         }
+        #echo json_encode($videoDetail['status'])."\r\n";
+
+        if (isset($videoDetail['contentDetails']['contentRating']['ytRating']) &&
+            $videoDetail['contentDetails']['contentRating']['ytRating'] === 'ytAgeRestricted') {
+            continue;
+        }
+        if (isset($videoDetail['snippet']['liveBroadcastContent']) &&
+            $videoDetail['snippet']['liveBroadcastContent'] !== 'none') {
+            continue;
+        }
+
 
         // Check if public
         if (!isset($videoDetail['status']['privacyStatus']) || $videoDetail['status']['privacyStatus'] !== 'public') {

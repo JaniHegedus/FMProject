@@ -4,29 +4,16 @@ services:
     app:
         build: .
         container_name: laravel_app
+        ports:
+            - "8000:8000"
+            - "5173:5173" # Vite default port
+        volumes:
+            - .:/var/www/html
         environment:
             APP_ENV: local
             APP_DEBUG: 'true'
             APP_KEY: base64:somekey
             DB_CONNECTION: sqlite
             DB_DATABASE: /var/www/html/database/database.sqlite
-        ports:
-            - "8000:8000"
-        # Healthcheck to ensure the app is up and responding
-        healthcheck:
-            test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]
-            interval: 5s
-            timeout: 5s
-            retries: 5
-            start_period: 10s
-
-    scheduler:
-        build: .
-        container_name: laravel_scheduler
-        depends_on:
-            app:
-                condition: service_healthy
-        command: sh -c "php scheduler.php"
-        # If you need to ensure a longer wait before scheduler starts,
-        # you could do something like:
-        # command: sh -c 'sleep 5 && php scheduler.php'
+            YOUTUBE_API_KEY:
+            PLAYLIST_ID:

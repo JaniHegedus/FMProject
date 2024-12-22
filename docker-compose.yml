@@ -1,29 +1,16 @@
-version: '3.9'
-
 services:
     app:
-        build: .
-        container_name: fmproject
-        image: laravel-app
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel_app
         ports:
             - "8000:8000"
         volumes:
             - .:/var/www/html
         environment:
             APP_ENV: local
-            APP_DEBUG: 'true'
-            APP_KEY: base64:somekey
+            APP_DEBUG: true
             DB_CONNECTION: sqlite
             DB_DATABASE: /var/www/html/database/database.sqlite
-            YOUTUBE_API_KEY:
-            PLAYLIST_ID:
-    vite:
-        image: node:18
-        container_name: vite
-        working_dir: /var/www/html
-        volumes:
-            - .:/var/www/html
-        command: >
-            sh -c "npm install && npm run dev"
-volumes:
-    laravel_data:
+            APP_URL: http://localhost:8000

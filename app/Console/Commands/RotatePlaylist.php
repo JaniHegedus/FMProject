@@ -1,109 +1,162 @@
 <?php
+
 namespace App\Console\Commands;
 
-use App\Services\YouTubeService;
 use Illuminate\Console\Command;
+use React\EventLoop\Factory;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use App\Models\PlaylistVideo;
+use App\Models\VideoData;
 
 class RotatePlaylist extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * You can run: php artisan playlist:rotate
+     */
     protected $signature = 'playlist:rotate';
-    protected $description = 'Rotate the playlist to the next video';
 
+    /**
+     * The console command description.
+     */
+    protected $description = 'Rotate the playlist from our DB using ReactPHP timers (long-running).';
+
+    protected $loop;
+
+    /**
+     * Execute the console command.
+     */
     public function handle()
     {
-        $youtube = new YouTubeService();
+        // 1) Create the ReactPHP event loop
+        $this->loop = Factory::create();
+        $this->info("Starting DB-based rotation. Press Ctrl+C to stop.");
 
-        // Step 1: Get the playlist videos
-        $playlistResponse = $youtube->getPlaylistVideos();
-        $playlistVideos = $playlistResponse['items'] ?? [];
+        // 2) Schedule the first rotation
+        $this->scheduleRotation();
 
-        if (empty($playlistVideos)) {
-            $this->error('The playlist is empty.');
-            return;
+        // 3) Run the event loop (never ends until you kill it)
+        $this->loop->run();
+    }
+
+    /**
+     * Schedule a rotation after the "current" track ends.
+     */
+    protected function scheduleRotation()
+    {
+        $duration = $this->rotatePlaylistFromDb();
+
+        if ($duration && $duration > 0) {
+            // Schedule next rotation exactly after $duration seconds
+            $this->info("Next rotation scheduled in {$duration} seconds...");
+            $this->loop->addTimer($duration, function () {
+                $this->scheduleRotation();
+            });
+        } else {
+            // If we didn’t get a valid duration, wait 10s and retry
+            $this->warn("No valid duration returned. Will retry in 10 seconds...");
+            $this->loop->addTimer(10, function () {
+                $this->scheduleRotation();
+            });
+        }
+    }
+
+    /**
+     * Rotate to the next video from the DB.
+     * Returns the new video’s duration (in seconds) or null/0 if something fails.
+     */
+    protected function rotatePlaylistFromDb()
+    {
+        // Step 1: Get all playlist videos from DB
+        // Make sure these tables are populated by your "youtube:update-playlist" or similar
+        $playlistVideos = PlaylistVideo::with('videoDatas')->get();
+
+        if ($playlistVideos->isEmpty()) {
+            $this->error("No videos in playlist_videos table.");
+            return 0;
         }
 
-        // Step 2: Extract video IDs
-        $videoIds = array_map(function ($video) {
-            return $video['snippet']['resourceId']['videoId'] ?? null;
-        }, $playlistVideos);
-
-        // Filter out null IDs
-        $videoIds = array_filter($videoIds);
-
-        if (empty($videoIds)) {
-            $this->error('No valid video IDs found in the playlist.');
-            return;
-        }
-
-        // Step 3: Get video details (including duration) from the `videos` API
-        $videoDetails = $youtube->getVideoDetails($videoIds);
-        // Parse durations into seconds
+        // Step 2: Build an array of {id, durationInSeconds} from DB
         $videoData = [];
-        foreach ($videoDetails['items'] as $video) {
-            $videoId = $video['id'];
-            $duration = $video['contentDetails']['duration'] ?? null;
-            $durationInSeconds = $this->convertDurationToSeconds($duration);
+        foreach ($playlistVideos as $pv) {
+            // If multiple VideoData records exist, pick whichever you like
+            $vd = $pv->videoDatas->first();
+            if (!$vd) {
+                // No data? Skip or set 0
+                continue;
+            }
 
-            $videoData[] = [
-                'id' => $videoId,
-                'duration' => $durationInSeconds,
-            ];
+            // We assume 'duration' is an ISO 8601 string (e.g. "PT4M13S")
+            // If you already store raw seconds, skip conversion
+            $isoDuration = $vd->duration;
+            $seconds     = $this->convertDurationToSeconds($isoDuration);
+
+            if ($seconds > 0) {
+                $videoData[] = [
+                    'id'       => $pv->video_id,
+                    'duration' => $seconds,
+                ];
+            }
         }
 
-        // Step 4: Get the current playlist state
+        if (empty($videoData)) {
+            $this->error("No valid durations found in the DB.");
+            return 0;
+        }
+
+        // Step 3: Get the current video from the playlist_state table
         $currentVideo = DB::table('playlist_state')->first();
 
-        if (!$currentVideo) {
-            $this->info('No current video is set. Initializing with the first video.');
-
-            // Set the first video
-            DB::table('playlist_state')->insert([
-                'video_id' => $videoData[0]['id'],
-                'start_time' => now(),
-                'duration' => $videoData[0]['duration'],
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            $this->info('Playlist initialized with the first video: ' . $videoData[0]['id']);
-            return;
+        // Step 4: Find the current video index
+        $currentIndex = false;
+        if ($currentVideo) {
+            $currentIndex = array_search($currentVideo->video_id, array_column($videoData, 'id'));
         }
 
-        // Step 5: Find the next video
-        $currentIndex = array_search($currentVideo->video_id, array_column($videoData, 'id'));
-
+        // Step 5: Determine the next index
         if ($currentIndex === false) {
-            $this->error('Current video is not in the playlist. Resetting to the first video.');
+            $this->line("Current video not found in DB. Resetting to the first.");
             $nextIndex = 0;
         } else {
             $nextIndex = ($currentIndex + 1) % count($videoData);
         }
 
-        // Step 6: Update the playlist state
+        // Step 6: Update playlist_state with the next video
         $nextVideo = $videoData[$nextIndex];
-        DB::table('playlist_state')->update([
-            'video_id' => $nextVideo['id'],
-            'start_time' => now(),
-            'duration' => $nextVideo['duration'],
-            'updated_at' => now(),
-        ]);
 
-        $this->info('Playlist rotated successfully. Next video: ' . $nextVideo['id']);
+        DB::table('playlist_state')->updateOrInsert(
+            ['id' => 1],  // or some other logic if you have multiple states
+            [
+                'video_id'   => $nextVideo['id'],
+                'start_time' => Carbon::now(),
+                'duration'   => $nextVideo['duration'],
+                'updated_at' => Carbon::now(),
+            ]
+        );
+
+        $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
+        return $nextVideo['duration'];
     }
 
-    private function convertDurationToSeconds($duration)
+    /**
+     * Convert an ISO 8601 duration (e.g. "PT4M13S") to total seconds.
+     * If your DB already stores integer seconds, you can skip this function.
+     */
+    protected function convertDurationToSeconds($duration)
     {
         if (!$duration) {
-            return null;
+            return 0;
         }
 
+        // Typical format: "PT4M13S" or "PT1H2M5S"
         preg_match_all('/(\d+)([HMS])/', $duration, $matches, PREG_SET_ORDER);
 
         $seconds = 0;
         foreach ($matches as $match) {
-            $value = (int)$match[1];
-            $unit = $match[2];
+            $value = (int) $match[1];
+            $unit  = $match[2];
 
             if ($unit === 'H') {
                 $seconds += $value * 3600;

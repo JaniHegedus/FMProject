@@ -1,35 +1,30 @@
-FROM php:8.2-cli
+# Dockerfile
+FROM php:8.2-fpm
 
-# Install dependencies
+# Install system dependencies: git, unzip, curl, sqlite libs, supervisor, cron
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    libonig-dev \
-    libxml2-dev \
+    curl \
     libsqlite3-dev \
-    npm \
-    && docker-php-ext-install pdo pdo_sqlite \
-    && rm -rf /var/lib/apt/lists/*
+    supervisor \
+    cron \
+    && docker-php-ext-install pdo pdo_sqlite
 
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
+# Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
-COPY . .
+# Copy in our Supervisor config and cron file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY crontab /etc/cron.d/laravel
 
-# Install project dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Make the cron file readable and register it
+RUN chmod 0644 /etc/cron.d/laravel \
+    && crontab /etc/cron.d/laravel \
+    && touch /var/log/cron.log
 
-# Ensure storage, bootstrap/cache, and database are writable
-RUN chown -R www-data:www-data storage bootstrap/cache database
-RUN chmod -R 777 database
-
+# Expose port if you want to use `artisan serve`
 EXPOSE 8000
 
-# Default command: start multiple processes
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-CMD ["/start.sh"]
+# The main CMD: run Supervisor in the foreground
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

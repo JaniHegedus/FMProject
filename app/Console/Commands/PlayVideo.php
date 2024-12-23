@@ -11,7 +11,7 @@ class PlayVideo extends Command
     /**
      * The name and signature of the console command.
      */
-    protected $signature = 'play {title : The title of the video to search for} {name : The name of the person requesting the change} {choice? : The index of the video to play, if multiple are found}';
+    protected $signature = 'play {title : The title of the video to search for} {name : The name of the person requesting the change}';
 
     /**
      * The console command description.
@@ -23,14 +23,19 @@ class PlayVideo extends Command
      */
     public function handle()
     {
+        // Get the video title from the input argument
         $title = $this->argument('title');
         $name = $this->argument('name');
-        $choice = $this->argument('choice');
 
+        // Fetch video details by joining playlist_videos and video_datas
         $videos = DB::table('playlist_videos')
             ->join('video_datas', 'playlist_videos.id', '=', 'video_datas.playlist_video_id')
-            ->where('playlist_videos.title', 'like', '%' . $title . '%')
-            ->select('playlist_videos.video_id', 'playlist_videos.title', 'video_datas.duration')
+            ->where('playlist_videos.title', 'like', '%' . $title . '%') // Match title
+            ->select(
+                'playlist_videos.video_id',
+                'playlist_videos.title',
+                'video_datas.duration'
+            )
             ->get();
 
         if ($videos->isEmpty()) {
@@ -38,18 +43,36 @@ class PlayVideo extends Command
             return 1;
         }
 
-        if ($videos->count() > 1 && is_null($choice)) {
-            $this->error("Multiple videos found. Please specify a choice (1-{$videos->count()}).");
+        // If more than one video is found, ask the user to choose
+        if ($videos->count() > 1) {
+            $this->info("Multiple videos found:");
+            foreach ($videos as $index => $video) {
+                $this->info(($index + 1) . ") " . $video->title . " (Video ID: " . $video->video_id . ")");
+            }
+
+            $choice = $this->ask("Enter the number of the video to play (1-{$videos->count()}):");
+
+            if (!is_numeric($choice) || $choice < 1 || $choice > $videos->count()) {
+                $this->error("Invalid choice.");
+                return 1;
+            }
+
+            $video = $videos[$choice - 1];
+        } else {
+            $video = $videos->first();
+        }
+
+        // Convert ISO 8601 duration to seconds
+        $durationInSeconds = $this->convertDurationToSeconds($video->duration);
+
+        if ($durationInSeconds <= 0) {
+            $this->error("Invalid duration for video: {$video->title}");
             return 1;
         }
 
-        // Resolve the video
-        $video = $videos->count() > 1 ? $videos[$choice - 1] : $videos->first();
-
-        $durationInSeconds = $this->convertDurationToSeconds($video->duration);
-
+        // Insert or update the record in the playlist_state table
         DB::table('playlist_state')->updateOrInsert(
-            ['id' => 1],
+            ['id' => 1], // Assuming only one playlist_state record
             [
                 'video_id'   => $video->video_id,
                 'start_time' => Carbon::now(),
@@ -61,6 +84,9 @@ class PlayVideo extends Command
         );
 
         $this->info("Playing video: {$video->title}");
+        $this->info("Video ID: {$video->video_id}");
+        $this->info("Duration: {$durationInSeconds} seconds");
+
         return 0;
     }
 

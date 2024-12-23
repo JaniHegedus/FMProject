@@ -132,6 +132,7 @@ class RotatePlaylist extends Command
                 'video_id'   => $nextVideo['id'],
                 'start_time' => Carbon::now(),
                 'duration'   => $nextVideo['duration'],
+                'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ]
         );

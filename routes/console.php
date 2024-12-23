@@ -18,3 +18,10 @@ Artisan::command('rotate_playlist', function () {
     $this->call('playlist:rotate');
 
 })->describe('Rotate the playlist');
+
+Artisan::command('play {title} {name}', function ($title, $name) {
+    $this->call(\App\Console\Commands\PlayVideo::class, [
+        'title' => $title,
+        'name'  => $name,
+    ]);
+})->describe('Play a song from the playlist Title: Name:');

@@ -28,6 +28,11 @@ class UpdateYouTubePlaylist extends Command
      * The console command description.
      */
     protected $description = 'Check if the playlist was updated today; if not, truncate tables and reload from YouTube.';
+    /**
+     * The region code for filtering.
+     * Consider moving this to a configuration file or environment variable for flexibility.
+     */
+    protected $region = 'HU';
 
     public function handle(YouTubeService $youtubeService)
     {
@@ -77,7 +82,12 @@ class UpdateYouTubePlaylist extends Command
             $detailItems = $videoDetails['items'] ?? [];
 
             // (4) Insert records into playlist_videos and video_datas
+            $i=0;
             foreach ($detailItems as $v) {
+                if (!$this->isVideoValid($v)) {
+                    // Video does not meet the criteria; skip insertion
+                    continue;
+                }
                 $vId = $v['id'];
                 $snippet = $v['snippet'] ?? [];
                 $contentDetails = $v['contentDetails'] ?? [];
@@ -99,11 +109,107 @@ class UpdateYouTubePlaylist extends Command
                     'status'            => $status['uploadStatus'] ?? null,
                     'duration'          => $contentDetails['duration'] ?? null,
                 ]);
+                $i++;
             }
 
-            $this->info("Reloaded " . count($detailItems) . " videos from YouTube.");
+            $this->info("Reloaded $i videos from YouTube.");
         } else {
             $this->info("Data is already up-to-date for today. No reload required.");
         }
+    }
+    protected function isVideoValid(array $videoDetail): bool
+    {
+        // Define the region code
+        $region = $this->region;
+
+        // 1. Check if 'status' and 'contentDetails' are present
+        if (empty($videoDetail['status']) || empty($videoDetail['contentDetails'])) {
+            return false;
+        }
+
+        // 2. Skip age-restricted videos
+        if (isset($videoDetail['contentDetails']['contentRating']['ytRating']) &&
+            $videoDetail['contentDetails']['contentRating']['ytRating'] === 'ytAgeRestricted') {
+            return false;
+        }
+
+        // 3. Skip live broadcasts or upcoming streams
+        if (isset($videoDetail['snippet']['liveBroadcastContent']) &&
+            $videoDetail['snippet']['liveBroadcastContent'] !== 'none') {
+            return false;
+        }
+
+        // 4. Ensure the video is public
+        if (!isset($videoDetail['status']['privacyStatus']) ||
+            $videoDetail['status']['privacyStatus'] !== 'public') {
+            return false;
+        }
+
+        // 5. Ensure the video is embeddable
+        if (isset($videoDetail['status']['embeddable']) &&
+            $videoDetail['status']['embeddable'] === false) {
+            return false;
+        }
+
+        // 6. Check for region restrictions
+        $regionRestriction = $videoDetail['contentDetails']['regionRestriction'] ?? null;
+        if ($regionRestriction) {
+            // If the region is blocked, skip the video
+            if (isset($regionRestriction['blocked']) &&
+                in_array($region, $regionRestriction['blocked'])) {
+                return false;
+            }
+
+            // If there's an allowlist and the region isn't allowed, skip the video
+            if (isset($regionRestriction['allowed']) &&
+                !in_array($region, $regionRestriction['allowed'])) {
+                return false;
+            }
+        }
+
+        // 7. Ensure the video has a duration
+        if (empty($videoDetail['contentDetails']['duration'])) {
+            return false;
+        }
+
+        // 8. Convert duration from ISO 8601 to seconds and ensure it's positive
+        $durationInSeconds = $this->convertDurationToSeconds($videoDetail['contentDetails']['duration']);
+        if (!$durationInSeconds) {
+            return false;
+        }
+
+        // All checks passed; video is valid
+        return true;
+    }
+    protected function convertDurationToSeconds(string $duration): ?int
+    {
+        if (!$duration) {
+            return null;
+        }
+
+        try {
+            $interval = new \DateInterval($duration);
+        } catch (\Exception $e) {
+            // Invalid duration format
+            Log::error("Invalid ISO 8601 duration format: {$duration}");
+            return null;
+        }
+
+        $seconds = ($interval->h * 3600) + ($interval->i * 60) + $interval->s;
+
+        // Include days if present
+        if ($interval->d) {
+            $seconds += $interval->d * 86400;
+        }
+
+        // Include months and years if present (approximate)
+        if ($interval->m) {
+            $seconds += $interval->m * 2592000; // 30 days per month
+        }
+        if ($interval->y) {
+            $seconds += $interval->y * 31536000; // 365 days per year
+        }
+
+        return $seconds > 0 ? $seconds : null;
     }
 }

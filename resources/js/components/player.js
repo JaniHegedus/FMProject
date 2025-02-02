@@ -95,6 +95,7 @@ async function onPlayerStateChange(event) {
         console.log("Video ended, loading next video in 1s.");
         setTimeout(() => loadNextVideo(), 1000);
     } else if (event.data === YT.PlayerState.PAUSED) {
+        console.log(playing);
         stopAttempts++;
         if (stopAttempts === 2) {
             stopAttempts = 0;

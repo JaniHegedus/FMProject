@@ -39,7 +39,8 @@ export async function checkForNewVideo() {
 
       if (data.video_id !== currentVideoId) {
         console.log("New video detected:", data.video_id);
-        if (playing) loadNextVideo();
+        currentVideoId = data.video_id;
+        loadNextVideo();
       }
     }
     setTimeout(() => checkForNewVideo(), 5000);

@@ -9,7 +9,7 @@ export let playing = true;
 export let currentVideoId = config.videoId || "";
 export let currentProgress = config.progress || 0;
 
-let defaultVolume = 25;
+let defaultVolume = 10;
 let stopAttempts = 0;
 let currentPopup = null;
 
@@ -80,7 +80,7 @@ function onPlayerReady(event) {
 async function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) {
         try {
-            player.setVolume(defaultVolume);
+            player.setVolume(parseInt(storedVolume, 10));
             player.unMute();
             const response = await fetch('/currentVideo');
             const data = await response.json();

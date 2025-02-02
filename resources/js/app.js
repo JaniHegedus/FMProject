@@ -2,6 +2,8 @@
 import './bootstrap'; // Assumes you have a bootstrap file to initialize your app.
 import {checkForNewVideo} from './components/videoLoader.js';
 
+// Kick off the periodic check for new video data.
+checkForNewVideo();
 
 // Fetch the logged in user via AJAX.
 async function fetchLoggedInUser() {

@@ -14,6 +14,7 @@ export async function loadNextVideo() {
     if (data.video_id !== currentVideoId) {
       // Update the video player with the new video.
       player.loadVideoById(data.video_id, data.progress ?? 0);
+      updateCurrentVideoId(data.video_id);
       document.getElementById("video-title").textContent = data.video_title;
       document.getElementById("video-start-time").textContent = data.start_time;
       if (data.requester !== '')
@@ -40,7 +41,6 @@ export async function checkForNewVideo() {
       if (data.video_id !== currentVideoId) {
         console.log("New video detected:", data.video_id);
         loadNextVideo();
-        updateCurrentVideoId(data.video_id);
       }
     }
     setTimeout(() => checkForNewVideo(), 5000);

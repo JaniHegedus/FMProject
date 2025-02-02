@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlaylistVideo;
 use Illuminate\Support\Facades\DB;
 
 class FMController extends Controller
@@ -15,7 +16,7 @@ class FMController extends Controller
             if (!$playlistState) {
                 return view('fm.index', ['error' => 'No video is currently playing.']);
             }
-
+            $playlistVideo = PlaylistVideo::where('video_id', $playlistState->video_id)->first();
             // Calculate the progress (in seconds) based on the server's current time
             $startTime = strtotime($playlistState->start_time);
             $currentTime = time();
@@ -23,7 +24,7 @@ class FMController extends Controller
 
             return view('fm.index', [
                 'videoId' => $playlistState->video_id,
-                'videoTitle' => "Currently Playing Video ID: " . $playlistState->video_id,
+                'videoTitle' => $playlistVideo->title,
                 'startTime' => $playlistState->start_time,
                 'progress' => $progress,
                 'duration' => $playlistState->duration ?? 0, // Provide a fallback for duration
@@ -37,6 +38,7 @@ class FMController extends Controller
     {
         try {
             $playlistState = DB::table('playlist_state')->first();
+            $playlistVideo = PlaylistVideo::where('video_id', $playlistState->video_id)->first();
 
             if (!$playlistState) {
                 return response()->json([
@@ -50,7 +52,7 @@ class FMController extends Controller
 
             return response()->json([
                 'video_id' => $playlistState->video_id,
-                'video_title' => "Currently Playing Video ID: " . $playlistState->video_id,
+                'video_title' => $playlistVideo->title,
                 'start_time' => $playlistState->start_time,
                 'duration' => $playlistState->duration ?? 0,
                 'progress' => $progress,

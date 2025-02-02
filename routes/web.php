@@ -15,7 +15,4 @@ Route::get('/test-youtube', function (YouTubeService $youtube) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 });
-Route::get('/api/current-video', function () {
-    $currentVideo = DB::table('playlist_state')->first();
-    return response()->json($currentVideo);
-});
+Route::get('/currentVideo', [App\Http\Controllers\FMController::class, 'currentVideo']);

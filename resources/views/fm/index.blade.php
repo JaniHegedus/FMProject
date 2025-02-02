@@ -217,14 +217,15 @@
                 modestbranding: 1,
                 rel: 0,
                 start: progress > 0 ? progress : 0,
-                mute: 1 // Start muted to comply with autoplay policy
+                mute: 1, // Start muted to comply with autoplay policy
+                iv_load_policy: 3, // Disable annotations
+                fs: 0,   // Disable fullscreen
             },
             events: {
                 onReady: onPlayerReady,
                 onStateChange: onPlayerStateChange,
             },
         });
-        // Prevent double-click fullscreen
 
         // If autoplay fails, user can click play
         playButton.addEventListener('click', () => {

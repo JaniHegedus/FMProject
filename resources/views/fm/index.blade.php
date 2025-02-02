@@ -340,6 +340,7 @@
                 document.getElementById("video-title").textContent = data.video_title;
                 document.getElementById("video-start-time").textContent = data.start_time;
                 if(data.requester !== '')document.getElementById("requester-text").textContent = 'Requested by: '+data.requester;
+                else document.getElementById("requester-text").textContent = '';
                 //console.log('Should ve loaded... this:'+ currentVideoId+" With progress: "+currentProgress);
             }
         } catch (error) {

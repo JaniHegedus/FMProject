@@ -13,11 +13,13 @@ Artisan::command('update_playlist', function () {
 
 })->describe('Update the playlist');
 
-Artisan::command('rotate_playlist', function () {
-    // Explicitly register your command class
-    $this->call('playlist:rotate');
-
+Artisan::command('rotate {--force}', function () {
+    // Retrieve the force option from this command
+    $force = $this->option('force');
+    // Call the 'playlist:rotate' command with the force option
+    $this->call('playlist:rotate', ['--force' => $force]);
 })->describe('Rotate the playlist');
+
 
 Artisan::command('play {title} {name}', function ($title, $name) {
     $this->call(\App\Console\Commands\PlayVideo::class, [

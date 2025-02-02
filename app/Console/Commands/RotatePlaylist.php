@@ -17,7 +17,7 @@ class RotatePlaylist extends Command
      *
      * You can run: php artisan playlist:rotate
      */
-    protected $signature = 'playlist:rotate';
+    protected $signature = 'playlist:rotate {--force : Force immediate rotation ignoring remaining time}';
 
     /**
      * The console command description.
@@ -33,10 +33,12 @@ class RotatePlaylist extends Command
     {
         // 1) Create the ReactPHP event loop
         $this->loop = Factory::create();
+        $force = $this->option('force');
+
         $this->info("Starting DB-based rotation. Press Ctrl+C to stop.");
 
         // 2) Schedule the first rotation
-        $this->scheduleRotation();
+        $this->scheduleRotation($force);
 
         // 3) Run the event loop (never ends until you kill it)
         $this->loop->run();
@@ -73,7 +75,10 @@ class RotatePlaylist extends Command
         // Step 1: Get all playlist videos from DB
         // Make sure these tables are populated by your "youtube:update-playlist" or similar
         $playlistVideos = PlaylistVideo::with('videoDatas')->get();
-
+        $requester = '';
+        if($force) {
+            $requester .= 'Forced Rotation';
+        }
         if ($playlistVideos->isEmpty()) {
             $this->error("No videos in playlist_videos table.");
             return 0;
@@ -148,8 +153,8 @@ class RotatePlaylist extends Command
                     'video_id'   => $nextVideo['id'],
                     'start_time' => Carbon::now(),
                     'duration'   => $nextVideo['duration'],
-                    'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
+                    'requested_by' => $requester
                 ]
             );
             $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");

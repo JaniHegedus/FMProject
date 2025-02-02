@@ -21,13 +21,15 @@ class FMController extends Controller
             $startTime = strtotime($playlistState->start_time);
             $currentTime = time();
             $progress = $currentTime - $startTime;
-
+            $requesterString = '';
+            if($playlistState->requested_by != '') $requesterString = 'Requested by: '.$playlistState->requested_by;
             return view('fm.index', [
                 'videoId' => $playlistState->video_id,
                 'videoTitle' => $playlistVideo->title,
                 'startTime' => $playlistState->start_time,
                 'progress' => $progress,
                 'duration' => $playlistState->duration ?? 0, // Provide a fallback for duration
+                'requester' => $requesterString,
             ]);
         } catch (\Exception $e) {
             return view('fm.index', ['error' => $e->getMessage()]);
@@ -56,6 +58,7 @@ class FMController extends Controller
                 'start_time' => $playlistState->start_time,
                 'duration' => $playlistState->duration ?? 0,
                 'progress' => $progress,
+                'requester' => $playlistState->requested_by,
             ]);
         } catch (\Exception $e) {
             return response()->json([

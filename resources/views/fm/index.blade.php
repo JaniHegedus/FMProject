@@ -140,6 +140,17 @@
             height: auto;    /* Keep the aspect ratio */
             z-index: 999;    /* Ensure it’s on top of other content */
         }
+        #requester {
+            z-index: 13;
+            position: fixed; /* Fixed position so it stays in place while scrolling */
+            top: 2%;    /* 10px from the bottom */
+            left: 1%;      /* 10px from the left */
+            width: auto;     /* Set a size for the logo */
+            height: auto;    /* Keep the aspect ratio */
+            color: white;
+            margin-bottom: 5px;
+            font-family: Arial, sans-serif;
+        }
 
     </style>
 </head>
@@ -154,6 +165,7 @@
         <input id="custom-volume" type="range" min="0" max="100">
     </div>
 </div>
+<div id="requester"><h1 id="requester-text"><?= $requester ?? ''?></h1></div>
 
 <div id="video-info">
     <h1 id="video-title">{{ $videoTitle ?? 'No video playing' }}</h1>
@@ -168,6 +180,7 @@
     let currentPopup = null; // Variable to hold the reference to the popup
     let currentVideoId = "{{ $videoId ?? '' }}";
     let currentProgress = {{ $progress ?? 0 }};
+    let requester = "{{ $requester ?? '' }}";
     let playing = true;
 
 
@@ -325,6 +338,7 @@
                 player.loadVideoById(currentVideoId, currentProgress);
                 document.getElementById("video-title").textContent = data.video_title;
                 document.getElementById("video-start-time").textContent = data.start_time;
+                if(data.requester !== '')document.getElementById("requester-text").textContent = 'Requested by: '+data.requester;
                 //console.log('Should ve loaded... this:'+ currentVideoId+" With progress: "+currentProgress);
             }
         } catch (error) {
@@ -408,10 +422,6 @@
             stopAttempts = 0;
         }, 5000);  // Show for 5 seconds before fading out
     }
-    document.getElementById('player-container').addEventListener('dblclick', function(event) {
-        event.preventDefault(); // Disable fullscreen on double-click
-        console.log('NOOO')
-    });
     checkForNewVideo();
 </script>
 </body>

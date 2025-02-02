@@ -1,0 +1,114 @@
+/* Settings Panel Container */
+#settings-panel {
+    position: absolute;
+    top: 50px;
+    right: 10px;
+    width: 240px;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    display: none; /* Shown as needed via JavaScript */
+    z-index: 12;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    font-family: 'Arial', sans-serif;
+}
+
+/* Label Styling */
+#settings-panel label {
+    display: block;
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+/* Range Input Styling */
+#settings-panel input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    margin: 10px 0;
+    background: transparent;
+}
+
+/* Track */
+#settings-panel input[type=range]::-webkit-slider-runnable-track {
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+}
+
+#settings-panel input[type=range]::-moz-range-track {
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+}
+
+/* Thumb */
+#settings-panel input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #6B73FF;
+    cursor: pointer;
+    margin-top: -5px; /* Centers the thumb with the track */
+    transition: background 0.3s, transform 0.3s;
+}
+
+#settings-panel input[type=range]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #6B73FF;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+
+/* Thumb Hover Effect */
+#settings-panel input[type=range]:hover::-webkit-slider-thumb,
+#settings-panel input[type=range]:hover::-moz-range-thumb {
+    background: #000DFF;
+    transform: scale(1.1);
+}
+
+/* Login Button Styling */
+#settings-panel .login-btn {
+    background: linear-gradient(135deg, #6B73FF, #000DFF);
+    color: #fff;
+    font-size: 14px;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    margin-top: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+#settings-panel .login-btn:hover {
+    background: linear-gradient(135deg, #000DFF, #6B73FF);
+    transform: translateY(-2px);
+}
+/* Styling for the user info container replacing the login button */
+#user-info {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-left: 10px;
+}
+
+/* Styling for the logout link inside the user info */
+#user-info a {
+    color: #f44336; /* Choose a color for the logout link */
+    margin-left: 10px;
+    text-decoration: none;
+    font-weight: normal;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+#user-info a:hover {
+    text-decoration: underline;
+    color: #d32f2f;
+}

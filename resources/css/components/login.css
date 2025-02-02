@@ -1,0 +1,147 @@
+/* resources/css/login.css */
+
+/* --- Login Button Styling --- */
+.login-btn {
+    background: linear-gradient(135deg, #6B73FF, #000DFF);
+    color: #fff;
+    font-size: 16px;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #000DFF, #6B73FF);
+    transform: translateY(-2px);
+}
+
+/* --- Modal Background --- */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Fade-in Animation for Modal */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- Modal Content Styling --- */
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 40px 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    position: relative;
+    animation: slideDown 0.5s ease-out;
+}
+
+/* Slide-down Animation */
+@keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* --- Modal Heading & Form Elements --- */
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    text-align: center;
+    color: #333;
+}
+
+.modal-content label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #555;
+}
+
+.modal-content input[type="email"],
+.modal-content input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border 0.2s;
+}
+
+.modal-content input[type="email"]:focus,
+.modal-content input[type="password"]:focus {
+    border-color: #6B73FF;
+    outline: none;
+}
+
+/* --- Submit Button inside Modal --- */
+.modal-content .btn {
+    background: linear-gradient(135deg, #6B73FF, #000DFF);
+    color: #fff;
+    padding: 12px;
+    width: 100%;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+}
+
+.modal-content .btn:hover {
+    background: linear-gradient(135deg, #000DFF, #6B73FF);
+    transform: translateY(-2px);
+}
+
+/* --- Close Button --- */
+.close {
+    color: #aaa;
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+.popup {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+
+.popup.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.popup.error {
+    background-color: #f44336;
+    color: white;
+}

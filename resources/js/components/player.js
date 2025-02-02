@@ -108,6 +108,7 @@ async function onPlayerStateChange(event) {
             player.playVideo();
             showPausePopup();
         }
+        setTimeout(function (){stopAttempts =0;},5000)
     }
 }
 

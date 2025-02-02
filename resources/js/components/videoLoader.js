@@ -1,5 +1,5 @@
 // videoLoader.js
-import { player, playing, currentVideoId } from './player.js';
+import {player, playing, currentVideoId, updateCurrentVideoId} from './player.js';
 
 export async function loadNextVideo() {
   try {
@@ -39,7 +39,7 @@ export async function checkForNewVideo() {
 
       if (data.video_id !== currentVideoId) {
         console.log("New video detected:", data.video_id);
-        currentVideoId = data.video_id;
+        updateCurrentVideoId(data.video_id);
         loadNextVideo();
       }
     }

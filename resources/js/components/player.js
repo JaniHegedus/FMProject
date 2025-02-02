@@ -117,3 +117,6 @@ export function setPlayerVolume(volume) {
         player.setVolume(volume);
     }
 }
+export function updateCurrentVideoId(newId) {
+    currentVideoId = newId;
+}

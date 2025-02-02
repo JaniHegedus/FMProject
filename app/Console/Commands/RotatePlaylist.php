@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\PlaylistState;
 use Illuminate\Console\Command;
 use React\EventLoop\Factory;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,7 @@ class RotatePlaylist extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         // 1) Create the ReactPHP event loop
         $this->loop = Factory::create();
@@ -44,10 +45,10 @@ class RotatePlaylist extends Command
     /**
      * Schedule a rotation after the "current" track ends.
      */
-    protected function scheduleRotation()
+    protected function scheduleRotation($force = false): void
     {
-        $duration = $this->rotatePlaylistFromDb();
-
+        $duration = $this->rotatePlaylistFromDb($force);
+        #$this->info($duration);
         if ($duration && $duration > 0) {
             // Schedule next rotation exactly after $duration seconds
             $this->info("Next rotation scheduled in {$duration} seconds...");
@@ -67,7 +68,7 @@ class RotatePlaylist extends Command
      * Rotate to the next video from the DB.
      * Returns the new video’s duration (in seconds) or null/0 if something fails.
      */
-    protected function rotatePlaylistFromDb()
+    protected function rotatePlaylistFromDb(bool $force = false)
     {
         // Step 1: Get all playlist videos from DB
         // Make sure these tables are populated by your "youtube:update-playlist" or similar
@@ -107,8 +108,18 @@ class RotatePlaylist extends Command
         }
 
         // Step 3: Get the current video from the playlist_state table
-        $currentVideo = DB::table('playlist_state')->first();
+        $currentVideo = PlaylistState::first();
+        // Convert start_time to Carbon object
+        $startTime = Carbon::parse($currentVideo->start_time);
 
+        // Get the current time as a Carbon instance
+        $currentTime = Carbon::now();
+
+        // Add duration (in seconds) to start time to get the end time
+        $endTime = $startTime->addSeconds($currentVideo->duration);
+
+        // Calculate remaining time by getting the difference in seconds
+        $currentRemaining = $currentTime->diffInSeconds($endTime, false); // The 'false' means we get the difference in seconds, and it can be negative if the end time is in the past
         // Step 4: Find the current video index
         $currentIndex = false;
         if ($currentVideo) {
@@ -125,27 +136,32 @@ class RotatePlaylist extends Command
 
         // Step 6: Update playlist_state with the next video
         $nextVideo = $videoData[$nextIndex];
-
-        DB::table('playlist_state')->updateOrInsert(
-            ['id' => 1],  // or some other logic if you have multiple states
-            [
-                'video_id'   => $nextVideo['id'],
-                'start_time' => Carbon::now(),
-                'duration'   => $nextVideo['duration'],
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ]
-        );
-
-        $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
-        return $nextVideo['duration'];
+        if($currentRemaining > 0 && !$force) {
+            $this->info('Waiting for current video to finish. Waiting: '.$currentRemaining.' seconds...');
+            sleep($currentRemaining);
+            $this->rotatePlaylistFromDb();
+            return $currentVideo->duration;
+        }else {
+            DB::table('playlist_state')->updateOrInsert(
+                ['id' => 1],  // or some other logic if you have multiple states
+                [
+                    'video_id'   => $nextVideo['id'],
+                    'start_time' => Carbon::now(),
+                    'duration'   => $nextVideo['duration'],
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]
+            );
+            $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
+            return $nextVideo['duration'];
+        }
     }
 
     /**
      * Convert an ISO 8601 duration (e.g. "PT4M13S") to total seconds.
      * If your DB already stores integer seconds, you can skip this function.
      */
-    protected function convertDurationToSeconds($duration)
+    protected function convertDurationToSeconds($duration): float|int
     {
         if (!$duration) {
             return 0;

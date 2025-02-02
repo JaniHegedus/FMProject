@@ -1,6 +1,6 @@
 // player.js
 import { config } from './config.js';
-import { showPausePopup } from './popup.js';
+import {hidePopup, showPausePopup} from './popup.js';
 import { loadNextVideo } from './videoLoader.js';
 
 export let player;
@@ -11,7 +11,6 @@ export let currentProgress = config.progress || 0;
 
 let defaultVolume = 10;
 let stopAttempts = 0;
-let currentPopup = null;
 
 // Check for a saved volume from localStorage.
 const storedVolume = localStorage.getItem('playerVolume');
@@ -100,15 +99,14 @@ async function onPlayerStateChange(event) {
         if (stopAttempts === 2) {
             stopAttempts = 0;
             playing = false;
-            if (currentPopup) {
-                currentPopup.remove();
-                currentPopup = null;
-            }
+            hidePopup();
         } else {
             player.playVideo();
             showPausePopup();
         }
-        setTimeout(function (){stopAttempts =0;},5000)
+        setTimeout(function (){
+            stopAttempts =0;
+            },5000)
     }
 }
 

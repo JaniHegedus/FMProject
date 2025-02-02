@@ -1,6 +1,7 @@
 // popup.js
+let popup = null
 export function showPausePopup() {
-    let popup = document.createElement('div');
+    popup = document.createElement('div');
     popup.textContent = 'If you wish to pause, please pause the video again in ';
     popup.style.position = 'fixed';
     popup.style.top = '10px';
@@ -40,4 +41,10 @@ export function showPausePopup() {
         }, 500);
         // Optionally, you could reset related state here.
     }, 5000);
+}
+export function hidePopup(){
+    if(popup){
+        popup.remove();
+    }
+    popup = null;
 }

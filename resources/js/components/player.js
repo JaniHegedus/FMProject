@@ -84,9 +84,6 @@ async function onPlayerStateChange(event) {
             player.unMute();
             const response = await fetch('/currentVideo');
             const data = await response.json();
-            if (data.progress > 0 && playing === false) {
-                player.seekTo(data.progress, true);
-            }
         } catch (e) {
             unmuteButton.style.display = 'block';
         }

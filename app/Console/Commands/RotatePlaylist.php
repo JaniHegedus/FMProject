@@ -158,17 +158,19 @@ class RotatePlaylist extends Command
                 $video_details = VideoData::where('playlist_video_id',$playlist_video->id)->first();
                 $this->info('Pool winner found! Playing: '.$playlist_video->title);
                 $requester = 'POOL';
+                $duration = $this->convertDurationToSeconds($video_details->duration);
                 DB::table('playlist_state')->updateOrInsert(
                     ['id' => 1],  // or some other logic if you have multiple states
                     [
                         'video_id'   => $video_id,
                         'start_time' => Carbon::now(),
-                        'duration'   => $this->convertDurationToSeconds($video_details->duration),
+                        'duration'   => $duration,
                         'updated_at' => Carbon::now(),
                         'requested_by' => $requester
                     ]
                 );
                 DB::table('playlist_pool')->truncate();
+                return $duration;
             }
             else{
                 DB::table('playlist_state')->updateOrInsert(
@@ -182,8 +184,8 @@ class RotatePlaylist extends Command
                     ]
                 );
                 $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
+                return $nextVideo['duration'];
             }
-            return $nextVideo['duration'];
         }
     }
 

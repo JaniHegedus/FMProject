@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VideoData extends Model
 {
@@ -18,7 +19,7 @@ class VideoData extends Model
         'duration',
     ];
 
-    public function playlistVideo()
+    public function playlistVideo(): BelongsTo
     {
         return $this->belongsTo(PlaylistVideo::class, 'playlist_video_id');
     }

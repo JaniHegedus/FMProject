@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -34,7 +35,10 @@ class UpdateYouTubePlaylist extends Command
      */
     protected $region = 'HU';
 
-    public function handle(YouTubeService $youtubeService)
+    /**
+     * @throws Exception
+     */
+    public function handle(YouTubeService $youtubeService): void
     {
         // We only do logic if the DB is outdated
         $today = Carbon::today()->toDateString();

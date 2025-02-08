@@ -3,7 +3,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @method static where
+ * @method static max(string $string)
+ */
 class PlaylistVideo extends Model
 {
     use HasFactory;
@@ -18,12 +24,12 @@ class PlaylistVideo extends Model
         'thumbnail_url',
     ];
 
-    public function playlistState()
+    public function playlistState(): BelongsTo
     {
         return $this->belongsTo(PlaylistState::class, 'playlist_state_id');
     }
 
-    public function videoDatas()
+    public function videoDatas(): HasMany
     {
         return $this->hasMany(VideoData::class, 'playlist_video_id');
     }

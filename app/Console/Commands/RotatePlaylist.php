@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Models\PlayListPool;
 use App\Models\PlaylistState;
-use Illuminate\Console\Command;
-use React\EventLoop\Factory;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use App\Models\PlaylistVideo;
 use App\Models\VideoData;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use React\EventLoop\Factory;
 
 class RotatePlaylist extends Command
 {
@@ -147,17 +148,41 @@ class RotatePlaylist extends Command
             $this->rotatePlaylistFromDb();
             return $currentVideo->duration;
         }else {
-            DB::table('playlist_state')->updateOrInsert(
-                ['id' => 1],  // or some other logic if you have multiple states
-                [
-                    'video_id'   => $nextVideo['id'],
-                    'start_time' => Carbon::now(),
-                    'duration'   => $nextVideo['duration'],
-                    'updated_at' => Carbon::now(),
-                    'requested_by' => $requester
-                ]
-            );
-            $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
+            $pollwinner = PlaylistPool::where('created_at', '<=', Carbon::now()->subMinutes(10))
+                ->orderBy('votes', 'desc')
+                ->first();
+
+            if($pollwinner){
+                $video_id = $pollwinner->video_id;
+                $playlist_video = PlaylistVideo::where('video_id',$video_id)->first();
+                $video_details = VideoData::where('playlist_video_id',$playlist_video->id)->first();
+                $this->info('Pool winner found! Playing: '.$playlist_video->title);
+                $requester = 'POOL';
+                DB::table('playlist_state')->updateOrInsert(
+                    ['id' => 1],  // or some other logic if you have multiple states
+                    [
+                        'video_id'   => $video_id,
+                        'start_time' => Carbon::now(),
+                        'duration'   => $this->convertDurationToSeconds($video_details->duration),
+                        'updated_at' => Carbon::now(),
+                        'requested_by' => $requester
+                    ]
+                );
+                DB::table('playlist_pool')->truncate();
+            }
+            else{
+                DB::table('playlist_state')->updateOrInsert(
+                    ['id' => 1],  // or some other logic if you have multiple states
+                    [
+                        'video_id'   => $nextVideo['id'],
+                        'start_time' => Carbon::now(),
+                        'duration'   => $nextVideo['duration'],
+                        'updated_at' => Carbon::now(),
+                        'requested_by' => $requester
+                    ]
+                );
+                $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
+            }
             return $nextVideo['duration'];
         }
     }

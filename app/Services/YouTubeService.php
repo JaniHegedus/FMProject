@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Dotenv\Dotenv;
@@ -11,18 +12,24 @@ class YouTubeService
     protected $apiKey;
     protected $playlist;
 
+    /**
+     * @throws Exception
+     */
     public function __construct()
     {
         $this->apiKey = config('services.youtube.api_key');
         $this->playlist = config('services.youtube.playlist_id');
 
         if (!$this->apiKey || !$this->playlist) {
-            throw new \Exception("YouTube API key or playlist ID is not configured.");
+            throw new Exception("YouTube API key or playlist ID is not configured.");
         }
     }
 
 
-    public function getPlaylistVideos($key = null)
+    /**
+     * @throws Exception
+     */
+    public function getPlaylistVideos($key = null): array
     {
         $url = "https://www.googleapis.com/youtube/v3/playlistItems";
         $videos = [];
@@ -46,7 +53,7 @@ class YouTubeService
                 $message .= "Request Parameters: " . json_encode($params, JSON_PRETTY_PRINT) . "\n";
                 $message .= "Response: " . $response->body() . "\n";
 
-                throw new \Exception($message);
+                throw new Exception($message);
             }
 
             $data = $response->json();
@@ -58,7 +65,10 @@ class YouTubeService
     }
 
 
-    public function getVideoDetails(array $videoIds)
+    /**
+     * @throws Exception
+     */
+    public function getVideoDetails(array $videoIds): array
     {
         $url = "https://www.googleapis.com/youtube/v3/videos";
         $videos = [];
@@ -89,7 +99,7 @@ class YouTubeService
             if (isset($data['items'])) {
                 $videos = array_merge($videos, $data['items']);
             } else {
-                \Log::warning("No video details found for batch: " . json_encode($batch));
+                Log::warning("No video details found for batch: " . json_encode($batch));
             }
         }
 

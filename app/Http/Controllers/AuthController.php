@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +13,7 @@ class AuthController extends Controller
     /**
      * Register a new user and log them in (saving them in the session).
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $validatedData = $request->validate([
             'name'     => 'required|string|max:255',
@@ -38,7 +39,7 @@ class AuthController extends Controller
     /**
      * Log in an existing user, storing them in the session.
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = $request->validate([
             'email'    => 'required|string|email',

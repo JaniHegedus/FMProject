@@ -54,12 +54,17 @@ html, body {
     z-index: 11;
     display: none;
 }
-
-#settings-button {
+#settings-wrapper {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 12;
+    display: flex;
+    align-items: center;
+}
+
+/* Settings button (unchanged) */
+#settings-button {
     background: none;
     border: none;
     cursor: pointer;
@@ -67,6 +72,7 @@ html, body {
     font-size: 24px;
     line-height: 1;
 }
+
 
 #site-logo {
     position: fixed;

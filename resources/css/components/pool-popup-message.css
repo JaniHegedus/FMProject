@@ -1,0 +1,21 @@
+/* pool-popup-message.css */
+
+/* Style for the pool popup message */
+.pool-popup-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #1e90ff; /* A vibrant blue that pops on dark backgrounds */
+    color: #fff;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    z-index: 1100;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* Class applied when hiding the popup */
+.pool-popup-message.hide {
+    opacity: 0;
+}

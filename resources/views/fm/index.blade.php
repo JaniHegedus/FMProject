@@ -23,7 +23,9 @@
     <div id="player"></div>
     <button id="play-button">Play</button>
     <button id="unmute-button">Unmute</button>
-    <button id="settings-button">⚙</button>
+    <div id="settings-wrapper">
+        <button id="settings-button">⚙</button>
+    </div>
     <div id="settings-panel">
         <label for="custom-volume">Volume:</label>
         <input id="custom-volume" type="range" min="0" max="100">

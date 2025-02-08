@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\PlaylistVideo;
+use Exception;
+use Illuminate\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\Factory;
+use Illuminate\View\View;
 
 class FMController extends Controller
 {
-    public function index()
+    public function index(): View|Factory|Application
     {
         try {
             // Fetch the current video and its start time
@@ -31,12 +36,12 @@ class FMController extends Controller
                 'duration' => $playlistState->duration ?? 0, // Provide a fallback for duration
                 'requester' => $requesterString,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return view('fm.index', ['error' => $e->getMessage()]);
         }
     }
 
-    public function currentVideo()
+    public function currentVideo(): JsonResponse
     {
         try {
             $playlistState = DB::table('playlist_state')->first();
@@ -60,7 +65,7 @@ class FMController extends Controller
                 'progress' => $progress,
                 'requester' => $playlistState->requested_by,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'error' => $e->getMessage(),
             ]);

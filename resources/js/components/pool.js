@@ -126,6 +126,7 @@ function showPoolPopup() {
 
     // Auto search: listen for input events on the search field.
     searchInput.addEventListener('input', debounce(function () {
+        updateCurrentPoolEntries();
         const query = searchInput.value.trim();
         if (!query) {
             resultsContainer.innerHTML = '';
@@ -199,20 +200,20 @@ function showPoolPopup() {
             credentials: 'include',
             body: JSON.stringify(data)
         })
-            .then(response => response.json())
-            .then(result => {
-                if (result.error) {
-                    alert('Error: ' + result.error);
-                } else {
-                    alert('Song submitted successfully: ' + result.video_title);
-                    closePopup();
-                    // After a successful submission, update the pool entries.
-                    updateCurrentPoolEntries();
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting song:', error);
-                alert('An error occurred while submitting the song.');
-            });
+        .then(response => response.json())
+        .then(result => {
+            if (result.error) {
+                alert('Error: ' + result.error);
+            } else {
+                alert('Song submitted successfully: ' + result.video_title);
+                closePopup();
+                // After a successful submission, update the pool entries.
+                updateCurrentPoolEntries();
+            }
+        })
+        .catch(error => {
+            console.error('Error submitting song:', error);
+            alert('An error occurred while submitting the song.');
+        });
     });
 }

@@ -10,4 +10,4 @@ Object.entries(modules).forEach(([path, module]) => {
     if (typeof module.init === 'function') {
         module.init();
     }
-});
+}); //NIGGA

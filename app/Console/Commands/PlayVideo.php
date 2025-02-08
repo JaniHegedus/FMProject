@@ -22,7 +22,7 @@ class PlayVideo extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
         // Get the video title from the input argument
         $title = $this->argument('title');
@@ -66,7 +66,7 @@ class PlayVideo extends Command
         }
 
         // Convert ISO 8601 duration to seconds
-        $durationInSeconds = $this->convertDurationToSeconds($video->duration);
+        $durationInSeconds = convertDurationToSeconds($video->duration);
 
         if ($durationInSeconds <= 0) {
             $this->error("Invalid duration for video: {$video->title}");
@@ -93,32 +93,4 @@ class PlayVideo extends Command
         return 0;
     }
 
-    /**
-     * Convert an ISO 8601 duration (e.g., "PT4M13S") to total seconds.
-     */
-    protected function convertDurationToSeconds($duration)
-    {
-        if (!$duration) {
-            return 0;
-        }
-
-        // Match the duration format (e.g., "PT4M13S" or "PT1H2M5S")
-        preg_match_all('/(\d+)([HMS])/', $duration, $matches, PREG_SET_ORDER);
-
-        $seconds = 0;
-        foreach ($matches as $match) {
-            $value = (int)$match[1];
-            $unit = $match[2];
-
-            if ($unit === 'H') {
-                $seconds += $value * 3600;
-            } elseif ($unit === 'M') {
-                $seconds += $value * 60;
-            } elseif ($unit === 'S') {
-                $seconds += $value;
-            }
-        }
-
-        return $seconds;
-    }
 }

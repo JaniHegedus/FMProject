@@ -17,7 +17,7 @@ class RotatePlaylist extends Command
      *
      * You can run: php artisan playlist:rotate
      */
-    protected $signature = 'playlist:rotate {--force : Force immediate rotation ignoring remaining time}';
+    protected $signature = 'playlist:rotate {--force : Force immediate rotation ignoring remaining time}{--noShuffle : Disables shuffle playlist items}';
 
     /**
      * The console command description.
@@ -34,11 +34,12 @@ class RotatePlaylist extends Command
         // 1) Create the ReactPHP event loop
         $this->loop = Factory::create();
         $force = $this->option('force');
+        $noShuffle = $this->option('noShuffle');
 
         $this->info("Starting DB-based rotation. Press Ctrl+C to stop.");
 
         // 2) Schedule the first rotation
-        $this->scheduleRotation($force);
+        $this->scheduleRotation($force,$noShuffle);
 
         // 3) Run the event loop (never ends until you kill it)
         $this->loop->run();
@@ -70,7 +71,7 @@ class RotatePlaylist extends Command
      * Rotate to the next video from the DB.
      * Returns the new video’s duration (in seconds) or null/0 if something fails.
      */
-    protected function rotatePlaylistFromDb(bool $force = false)
+    protected function rotatePlaylistFromDb(bool $force = false, bool $noShuffle = false) : mixed
     {
         // Step 1: Get all playlist videos from DB
         // Make sure these tables are populated by your "youtube:update-playlist" or similar
@@ -136,7 +137,8 @@ class RotatePlaylist extends Command
             $this->line("Current video not found in DB. Resetting to the first.");
             $nextIndex = 0;
         } else {
-            $nextIndex = ($currentIndex + 1) % count($videoData);
+            if($noShuffle) $nextIndex = ($currentIndex + 1) % count($videoData);
+            else $nextIndex = rand(0, count($videoData) - 1);
         }
 
         // Step 6: Update playlist_state with the next video
@@ -157,7 +159,7 @@ class RotatePlaylist extends Command
                 $video_details = VideoData::where('playlist_video_id',$playlist_video->id)->first();
                 $this->info('Pool winner found! Playing: '.$playlist_video->title);
                 $requester = 'POOL';
-                $duration = $this->convertDurationToSeconds($video_details->duration);
+                $duration = convertDurationToSeconds($video_details->duration);
                 PlaylistState::updateOrInsert(
                     ['id' => 1],  // or some other logic if you have multiple states
                     [
@@ -192,29 +194,4 @@ class RotatePlaylist extends Command
      * Convert an ISO 8601 duration (e.g. "PT4M13S") to total seconds.
      * If your DB already stores integer seconds, you can skip this function.
      */
-    protected function convertDurationToSeconds($duration): float|int
-    {
-        if (!$duration) {
-            return 0;
-        }
-
-        // Typical format: "PT4M13S" or "PT1H2M5S"
-        preg_match_all('/(\d+)([HMS])/', $duration, $matches, PREG_SET_ORDER);
-
-        $seconds = 0;
-        foreach ($matches as $match) {
-            $value = (int) $match[1];
-            $unit  = $match[2];
-
-            if ($unit === 'H') {
-                $seconds += $value * 3600;
-            } elseif ($unit === 'M') {
-                $seconds += $value * 60;
-            } elseif ($unit === 'S') {
-                $seconds += $value;
-            }
-        }
-
-        return $seconds;
-    }
 }

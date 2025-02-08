@@ -98,7 +98,7 @@ class RotatePlaylist extends Command
             // We assume 'duration' is an ISO 8601 string (e.g. "PT4M13S")
             // If you already store raw seconds, skip conversion
             $isoDuration = $vd->duration;
-            $seconds     = $this->convertDurationToSeconds($isoDuration);
+            $seconds     = convertDurationToSeconds($isoDuration);
 
             if ($seconds > 0) {
                 $videoData[] = [

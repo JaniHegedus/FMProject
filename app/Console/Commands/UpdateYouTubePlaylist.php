@@ -176,43 +176,12 @@ class UpdateYouTubePlaylist extends Command
         }
 
         // 8. Convert duration from ISO 8601 to seconds and ensure it's positive
-        $durationInSeconds = $this->convertDurationToSeconds($videoDetail['contentDetails']['duration']);
+        $durationInSeconds = convertDurationToSeconds($videoDetail['contentDetails']['duration']);
         if (!$durationInSeconds) {
             return false;
         }
 
         // All checks passed; video is valid
         return true;
-    }
-    protected function convertDurationToSeconds(string $duration): ?int
-    {
-        if (!$duration) {
-            return null;
-        }
-
-        try {
-            $interval = new \DateInterval($duration);
-        } catch (\Exception $e) {
-            // Invalid duration format
-            Log::error("Invalid ISO 8601 duration format: {$duration}");
-            return null;
-        }
-
-        $seconds = ($interval->h * 3600) + ($interval->i * 60) + $interval->s;
-
-        // Include days if present
-        if ($interval->d) {
-            $seconds += $interval->d * 86400;
-        }
-
-        // Include months and years if present (approximate)
-        if ($interval->m) {
-            $seconds += $interval->m * 2592000; // 30 days per month
-        }
-        if ($interval->y) {
-            $seconds += $interval->y * 31536000; // 365 days per year
-        }
-
-        return $seconds > 0 ? $seconds : null;
     }
 }

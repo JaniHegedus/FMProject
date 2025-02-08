@@ -9,8 +9,8 @@ use Dotenv\Dotenv;
 
 class YouTubeService
 {
-    protected $apiKey;
-    protected $playlist;
+    protected mixed $apiKey;
+    protected mixed $playlist;
 
     /**
      * @throws Exception

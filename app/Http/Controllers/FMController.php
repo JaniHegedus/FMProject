@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlaylistState;
 use App\Models\PlaylistVideo;
 use Exception;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\Factory;
 use Illuminate\View\View;
 
@@ -16,7 +16,7 @@ class FMController extends Controller
     {
         try {
             // Fetch the current video and its start time
-            $playlistState = DB::table('playlist_state')->first();
+            $playlistState = PlaylistState::first();
 
             if (!$playlistState) {
                 return view('fm.index', ['error' => 'No video is currently playing.']);
@@ -44,7 +44,7 @@ class FMController extends Controller
     public function currentVideo(): JsonResponse
     {
         try {
-            $playlistState = DB::table('playlist_state')->first();
+            $playlistState = PlaylistState::first();
             $playlistVideo = PlaylistVideo::where('video_id', $playlistState->video_id)->first();
 
             if (!$playlistState) {

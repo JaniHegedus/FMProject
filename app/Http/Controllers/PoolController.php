@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlayListPool;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request; // Make sure this is the correct Request import
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use App\Models\PlaylistVideo;
 
 class PoolController extends Controller
@@ -31,7 +31,7 @@ class PoolController extends Controller
             $currentUserId = Auth::user()->id;
 
             // Check if this video_id already exists in the pool table.
-            $existingEntry = DB::table('playlist_pool')->where('video_id', $video_id)->first();
+            $existingEntry = PlayListPool::where('video_id', $video_id)->first();
 
             if ($existingEntry) {
                 // Decode the voted_by column (assumed to be stored as JSON).
@@ -43,13 +43,11 @@ class PoolController extends Controller
                 if (!in_array($currentUserId, $votedBy)) {
                     // If the current user hasn't voted yet, add their id to the array and increment votes.
                     $votedBy[] = $currentUserId;
-                    DB::table('playlist_pool')
-                        ->where('video_id', $video_id)
-                        ->update([
-                            'votes'      => $existingEntry->votes + 1,
-                            'voted_by'   => json_encode($votedBy),
-                            'updated_at' => now(),
-                        ]);
+                    PlayListPool::where('video_id', $video_id)->update([
+                        'votes'      => $existingEntry->votes + 1,
+                        'voted_by'   => json_encode($votedBy),
+                        'updated_at' => now(),
+                    ]);
                     $message = 'Vote added successfully.';
                 } else {
                     // Optionally, you can choose to return a message that the user already voted.
@@ -57,7 +55,7 @@ class PoolController extends Controller
                 }
             } else {
                 // Create a new entry with votes set to 1 and voted_by containing the current user id.
-                DB::table('playlist_pool')->insert([
+                PlayListPool::insert([
                     'video_id'   => $video_id,
                     'created_by' => $currentUserId,
                     'votes'      => 1,
@@ -83,7 +81,7 @@ class PoolController extends Controller
     public function getPoolStatus(): JsonResponse
     {
         try {
-            $poolEntries = DB::table('playlist_pool')->get();
+            $poolEntries = PlayListPool::get();
             foreach ($poolEntries as $entry) {
                 $video = PlaylistVideo::where('video_id', $entry->video_id)->first();
                 $entry->video_title = $video ? $video->title : null;

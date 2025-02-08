@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use Exception;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
@@ -51,8 +50,8 @@ class UpdateYouTubePlaylist extends Command
             $this->info("Data is not up to date. Truncating and reloading...");
 
             // For SQLite, TRUNCATE might not be supported, so let's do a full delete
-            DB::statement('DELETE FROM video_datas;');
-            DB::statement('DELETE FROM playlist_videos;');
+            VideoData::truncate();
+            PlaylistVideo::truncate();
 
             // Optionally reset the auto-increment (doesn't always work in SQLite)
             // DB::statement('DELETE FROM sqlite_sequence WHERE name="video_datas";');

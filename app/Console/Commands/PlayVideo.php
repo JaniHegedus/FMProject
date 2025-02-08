@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\PlaylistState;
+use App\Models\PlaylistVideo;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class PlayVideo extends Command
@@ -28,15 +29,17 @@ class PlayVideo extends Command
         $name = $this->argument('name');
 
         // Fetch video details by joining playlist_videos and video_datas
-        $videos = DB::table('playlist_videos')
-            ->join('video_datas', 'playlist_videos.id', '=', 'video_datas.playlist_video_id')
-            ->where('playlist_videos.title', 'like', '%' . $title . '%') // Match title
-            ->select(
-                'playlist_videos.video_id',
-                'playlist_videos.title',
-                'video_datas.duration'
-            )
-            ->get();
+        $videos = PlaylistVideo::where('title', 'like', '%' . $title . '%')
+            ->with('videoDatas')
+            ->get()
+            ->map(function($video) {
+                return [
+                    'video_id' => $video->video_id,
+                    'title' => $video->title,
+                    'duration' => optional($video->videoDatas->first())->duration
+                ];
+            });
+
 
         if ($videos->isEmpty()) {
             $this->error("No video found with title: {$title}");
@@ -71,7 +74,7 @@ class PlayVideo extends Command
         }
 
         // Insert or update the record in the playlist_state table
-        DB::table('playlist_state')->updateOrInsert(
+        PlaylistState::updateOrInsert(
             ['id' => 1], // Assuming only one playlist_state record
             [
                 'video_id'   => $video->video_id,

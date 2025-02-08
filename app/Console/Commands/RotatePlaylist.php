@@ -8,7 +8,6 @@ use App\Models\PlaylistVideo;
 use App\Models\VideoData;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use React\EventLoop\Factory;
 
 class RotatePlaylist extends Command
@@ -159,7 +158,7 @@ class RotatePlaylist extends Command
                 $this->info('Pool winner found! Playing: '.$playlist_video->title);
                 $requester = 'POOL';
                 $duration = $this->convertDurationToSeconds($video_details->duration);
-                DB::table('playlist_state')->updateOrInsert(
+                PlaylistState::updateOrInsert(
                     ['id' => 1],  // or some other logic if you have multiple states
                     [
                         'video_id'   => $video_id,
@@ -169,11 +168,11 @@ class RotatePlaylist extends Command
                         'requested_by' => $requester
                     ]
                 );
-                DB::table('playlist_pool')->truncate();
+                PlayListPool::truncate();
                 return $duration;
             }
             else{
-                DB::table('playlist_state')->updateOrInsert(
+                PlaylistState::updateOrInsert(
                     ['id' => 1],  // or some other logic if you have multiple states
                     [
                         'video_id'   => $nextVideo['id'],

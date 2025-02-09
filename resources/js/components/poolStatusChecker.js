@@ -56,7 +56,7 @@ export function checkForNewPool() {
                 }
             } else {
                 // No poll exists—update the button text and make sure it's visible.
-                if (createPoolBtn) {
+                if (createPoolBtn && isUserLoggedIn) {
                     createPoolBtn.textContent = 'Create a Pool';
                     createPoolBtn.style.display = 'block';
                 }

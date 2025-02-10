@@ -6,6 +6,7 @@ use App\Models\PlaylistState;
 use App\Models\PlaylistVideo;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PlayVideo extends Command
 {
@@ -29,16 +30,15 @@ class PlayVideo extends Command
         $name = $this->argument('name');
 
         // Fetch video details by joining playlist_videos and video_datas
-        $videos = PlaylistVideo::where('title', 'like', '%' . $title . '%')
-            ->with('videoDatas')
-            ->get()
-            ->map(function($video) {
-                return [
-                    'video_id' => $video->video_id,
-                    'title' => $video->title,
-                    'duration' => optional($video->videoDatas->first())->duration
-                ];
-            });
+        $videos = DB::table('playlist_videos')
+            ->join('video_datas', 'playlist_videos.id', '=', 'video_datas.playlist_video_id')
+            ->where('playlist_videos.title', 'like', '%' . $title . '%') // Match title
+            ->select(
+                'playlist_videos.video_id',
+                'playlist_videos.title',
+                'video_datas.duration'
+            )
+            ->get();
 
 
         if ($videos->isEmpty()) {

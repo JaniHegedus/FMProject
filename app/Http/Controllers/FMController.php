@@ -12,6 +12,10 @@ use Illuminate\View\View;
 
 class FMController extends Controller
 {
+    /**
+     * Front Page Of Course
+     * @return View|Factory|Application
+     */
     public function index(): View|Factory|Application
     {
         try {
@@ -41,6 +45,10 @@ class FMController extends Controller
         }
     }
 
+    /**
+     * This is for querying the current Video for the synced listening.
+     * @return JsonResponse
+     */
     public function currentVideo(): JsonResponse
     {
         try {
@@ -48,9 +56,7 @@ class FMController extends Controller
             $playlistVideo = PlaylistVideo::where('video_id', $playlistState->video_id)->first();
 
             if (!$playlistState) {
-                return response()->json([
-                    'error' => 'No video is currently playing.',
-                ]);
+                return returnJSONErrorMessage('No video is currently playing.');
             }
 
             $startTime = strtotime($playlistState->start_time);
@@ -66,9 +72,7 @@ class FMController extends Controller
                 'requester' => $playlistState->requested_by,
             ]);
         } catch (Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-            ]);
+            return returnErrorJSON($e);
         }
     }
 }

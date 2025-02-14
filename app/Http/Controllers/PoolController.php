@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PlayListPool;
+use App\Models\VideoData;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request; // Make sure this is the correct Request import
@@ -11,6 +12,11 @@ use App\Models\PlaylistVideo;
 
 class PoolController extends Controller
 {
+    /**
+     * This method is for starting a pool, also used to add a song to the pool.
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function startPool(Request $request): JsonResponse
     {
         // Validate the request using the request instance.
@@ -22,9 +28,7 @@ class PoolController extends Controller
             // Check if the video exists in the PlaylistVideo table.
             $playlistVideo = PlaylistVideo::where('video_id', $request->input('video_id'))->first();
             if (!$playlistVideo) {
-                return response()->json([
-                    'error' => 'Video not found in playlist.'
-                ], 404);
+                return returnJSONErrorMessage('Video not found in playlist.',404);
             }
 
             $video_id = $request->input('video_id');
@@ -55,13 +59,11 @@ class PoolController extends Controller
                 }
             } else {
                 // Create a new entry with votes set to 1 and voted_by containing the current user id.
-                PlayListPool::insert([
+                PlayListPool::create([
                     'video_id'   => $video_id,
-                    'created_by' => $currentUserId,
                     'votes'      => 1,
                     'voted_by'   => json_encode([$currentUserId]),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'created_by' => $currentUserId,
                 ]);
                 $message = 'Pool started successfully.';
             }
@@ -72,35 +74,27 @@ class PoolController extends Controller
                 'video_title' => $playlistVideo->title,
             ]);
         } catch (Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-            ], 500);
+            return returnErrorJSON($e);
         }
     }
 
+    /**
+     * This is for getting the current status of the current pool.
+     * @return JsonResponse
+     */
     public function getPoolStatus(): JsonResponse
     {
         try {
             $poolEntries = PlayListPool::get();
             foreach ($poolEntries as $entry) {
                 $video = PlaylistVideo::where('video_id', $entry->video_id)->first();
-                $entry->video_title = $video ? $video->title : null;
+                $details = VideoData::where('playlist_video_id', $video->id)->first();
+                $entry->video_description = $details?->description;
+                $entry->video_title = $video?->title;
             }
-            if ($poolEntries->isEmpty()) {
-                return response()->json([
-                    'empty'   => true,
-                    'message' => 'The pool is empty.',
-                ]);
-            }
-
-            return response()->json([
-                'empty'   => false,
-                'entries' => $poolEntries,
-            ]);
+            return returnEntriesAsJSON($poolEntries, 'The pool is empty.');
         } catch (Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-            ], 500);
+            return returnErrorJSON($e);
         }
     }
 }

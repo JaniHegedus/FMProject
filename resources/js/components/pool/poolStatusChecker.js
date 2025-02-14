@@ -1,4 +1,4 @@
-import { fetchLoggedInUser } from '../app.js';
+import { fetchLoggedInUser } from '../../app.js';
 
 // Global variables to track the pool icon, whether the pool has been acknowledged,
 // current pool entries, the currently open pool modal overlay, and the current user ID.
@@ -255,7 +255,7 @@ function buildPoolList(listContainer, entries) {
         listItem.className = 'pool-entry-item';
 
         // Check if this entry was submitted by the current user.
-        const isSubmittedByCurrentUser = currentUserId && (entry.created_by == currentUserId);
+        const isSubmittedByCurrentUser = currentUserId && (entry.created_by === currentUserId);
         // Determine if the current user has already voted for this entry.
         // Assume entry.voted_by is either an array or a JSON string.
         let votedBy = entry.voted_by;
@@ -274,6 +274,36 @@ function buildPoolList(listContainer, entries) {
         const titleEl = document.createElement('div');
         titleEl.className = 'pool-entry-title';
         titleEl.textContent = entry.video_title || entry.video_id;
+
+        if (entry.video_description) {
+            // Show the tooltip on mouseenter
+            titleEl.addEventListener('mouseenter', () => {
+                const tooltipEl = document.createElement('div');
+                tooltipEl.className = 'tooltip';
+                tooltipEl.textContent = entry.video_description;
+
+                // Append tooltip to body (so it’s not clipped by container overflow)
+                document.body.appendChild(tooltipEl);
+
+                // Position the tooltip to the right of the title element
+                const rect = titleEl.getBoundingClientRect();
+                tooltipEl.style.position = 'absolute';
+                // Move tooltip to the right side of the element
+                tooltipEl.style.left = `${rect.right + window.scrollX + 10}px`;
+                // Align the tooltip vertically with the top of the element
+                tooltipEl.style.top = `${rect.top + window.scrollY}px`;
+            });
+
+            // Remove the tooltip on mouseleave
+            titleEl.addEventListener('mouseleave', () => {
+                const tooltipEl = document.querySelector('.tooltip');
+                if (tooltipEl) {
+                    tooltipEl.remove();
+                }
+            });
+        }
+
+        listItem.appendChild(titleEl);
         listItem.appendChild(titleEl);
 
         const barContainer = document.createElement('div');

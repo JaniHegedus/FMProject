@@ -5,15 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PlayListPool extends Model
+class History extends Model
 {
     use HasFactory;
 
-    protected $table = 'playlist_pool';
+    protected $table = 'history';
     protected $fillable = [
-        'video_id',
-        'created_by',
-        'votes',
-        'voted_by'
+        'playlist_video_id',
+        'played_at'
     ];
 }

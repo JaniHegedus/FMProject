@@ -12,6 +12,8 @@ class AuthController extends Controller
 {
     /**
      * Register a new user and log them in (saving them in the session).
+     * @param Request $request
+     * @return JsonResponse
      */
     public function register(Request $request): JsonResponse
     {
@@ -38,6 +40,8 @@ class AuthController extends Controller
 
     /**
      * Log in an existing user, storing them in the session.
+     * @param Request $request
+     * @return JsonResponse
      */
     public function login(Request $request): JsonResponse
     {
@@ -66,6 +70,8 @@ class AuthController extends Controller
 
     /**
      * Log out the currently authenticated user.
+     * @param Request $request
+     * @return JsonResponse
      */
     public function logout(Request $request)
     {

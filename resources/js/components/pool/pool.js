@@ -1,4 +1,4 @@
-import { fetchLoggedInUser } from '../app.js';
+import { fetchLoggedInUser } from '../../app.js';
 
 // Define a global variable to store current pool entries.
 let currentPoolEntries = [];

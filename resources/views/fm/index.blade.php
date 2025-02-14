@@ -22,8 +22,8 @@
 <div id="player-container">
     <div id="player"></div>
     <button id="play-button">Play</button>
-    <button id="unmute-button">Unmute</button>
     <div id="settings-wrapper">
+        <button id="history-button">History</button>
         <button id="settings-button">⚙</button>
     </div>
     <div id="settings-panel">

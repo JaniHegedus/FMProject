@@ -1,7 +1,7 @@
 // app.js
 import './bootstrap'; // Assumes you have a bootstrap file to initialize your app.
 import {checkForNewVideo} from './components/videoLoader.js';
-import { checkForNewPool } from './components/poolStatusChecker.js';
+import { checkForNewPool } from './components/pool/poolStatusChecker.js';
 
 // Kick off the periodic check for new video data.
 checkForNewVideo();

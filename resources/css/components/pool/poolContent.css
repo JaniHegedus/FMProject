@@ -65,39 +65,52 @@
 .pool-content-close:hover {
     color: #fff;
 }
-
-/* List Style for Pool Entries */
+/* Container that holds all entries */
 .pool-entries-list {
     list-style: none;
     padding: 0;
     margin-top: 15px;
+    max-height: 400px; /* Make the list scroll if it gets too long */
+    overflow-y: auto;
 }
 
-/* Each Pool Entry */
-/* Style for each pool entry */
+/* Individual entry styles */
 .pool-entry-item {
     padding: 8px;
     border-bottom: 1px solid #444;
-}
-
-/* Change appearance when an entry has been voted */
-.pool-entry-item.voted {
-    opacity: 0.6;
-    cursor: default;
 }
 
 .pool-entry-item:last-child {
     border-bottom: none;
 }
 
-/* Title for each entry */
+.pool-entry-item.voted {
+    opacity: 0.6;
+    cursor: default;
+}
+
+/* The title element (hovered to show tooltip) */
 .pool-entry-title {
     font-size: 16px;
     margin-bottom: 5px;
     font-weight: bold;
+    cursor: pointer;
 }
 
-/* Progress Bar Container */
+/* Tooltip appears outside the container (appended to <body>) */
+.tooltip {
+    position: absolute; /* We set this in JS as well, but safe to have here */
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    max-width: 300px;
+    white-space: normal;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 10000;
+}
+
+/* Progress bar container */
 .pool-entry-bar-container {
     background-color: #333;
     height: 20px;
@@ -106,7 +119,7 @@
     margin-bottom: 5px;
 }
 
-/* The Progress Bar itself */
+/* The progress bar itself */
 .pool-entry-progress-bar {
     background-color: #1e90ff;
     height: 100%;
@@ -114,7 +127,7 @@
     transition: width 0.5s ease;
 }
 
-/* Vote Count Display */
+/* Vote count display */
 .pool-entry-vote-count {
     font-size: 14px;
     color: #fff;

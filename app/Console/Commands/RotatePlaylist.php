@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\History;
 use App\Models\PlayListPool;
 use App\Models\PlaylistState;
 use App\Models\PlaylistVideo;
+use App\Models\User;
 use App\Models\VideoData;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -130,6 +132,7 @@ class RotatePlaylist extends Command
         $currentIndex = false;
         if ($currentVideo) {
             $currentIndex = array_search($currentVideo->video_id, array_column($videoData, 'id'));
+            $this->addToHistory($currentVideo);
         }
 
         // Step 5: Determine the next index
@@ -149,16 +152,16 @@ class RotatePlaylist extends Command
             $this->rotatePlaylistFromDb();
             return $currentVideo->duration;
         }else {
-            $pollwinner = PlaylistPool::where('created_at', '<=', Carbon::now()->subMinutes(10))
+            $poolwinner = PlaylistPool::where('created_at', '<=', Carbon::now()->subMinutes(10))
                 ->orderBy('votes', 'desc')
                 ->first();
 
-            if($pollwinner){
-                $video_id = $pollwinner->video_id;
+            if($poolwinner){
+                $video_id = $poolwinner->video_id;
                 $playlist_video = PlaylistVideo::where('video_id',$video_id)->first();
                 $video_details = VideoData::where('playlist_video_id',$playlist_video->id)->first();
                 $this->info('Pool winner found! Playing: '.$playlist_video->title);
-                $requester = 'POOL';
+                $requester = User::where('id',$poolwinner->created_by)->first()->name ?? 'Pool';
                 $duration = convertDurationToSeconds($video_details->duration);
                 PlaylistState::updateOrInsert(
                     ['id' => 1],  // or some other logic if you have multiple states
@@ -194,4 +197,12 @@ class RotatePlaylist extends Command
      * Convert an ISO 8601 duration (e.g. "PT4M13S") to total seconds.
      * If your DB already stores integer seconds, you can skip this function.
      */
+    private function addToHistory(PlaylistState $currentVideo)
+    {
+        $playlistVideo = PlaylistVideo::where('video_id',$currentVideo->video_id)->first();
+        History::create([
+            'playlist_video_id' => $playlistVideo->id,
+            'played_at' => $currentVideo->start_time
+        ]);
+    }
 }

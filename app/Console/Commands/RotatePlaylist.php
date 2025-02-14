@@ -132,7 +132,6 @@ class RotatePlaylist extends Command
         $currentIndex = false;
         if ($currentVideo) {
             $currentIndex = array_search($currentVideo->video_id, array_column($videoData, 'id'));
-            $this->addToHistory($currentVideo);
         }
 
         // Step 5: Determine the next index
@@ -150,6 +149,7 @@ class RotatePlaylist extends Command
             $this->info('Waiting for current video to finish. Waiting: '.$currentRemaining.' seconds...');
             sleep($currentRemaining);
             $this->rotatePlaylistFromDb();
+            $this->addToHistory($currentVideo);
             return $currentVideo->duration;
         }else {
             $poolwinner = PlaylistPool::where('created_at', '<=', Carbon::now()->subMinutes(10))
@@ -174,6 +174,7 @@ class RotatePlaylist extends Command
                     ]
                 );
                 PlayListPool::truncate();
+                $this->addToHistory($currentVideo);
                 return $duration;
             }
             else{
@@ -188,6 +189,7 @@ class RotatePlaylist extends Command
                     ]
                 );
                 $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
+                $this->addToHistory($currentVideo);
                 return $nextVideo['duration'];
             }
         }
@@ -197,7 +199,7 @@ class RotatePlaylist extends Command
      * Convert an ISO 8601 duration (e.g. "PT4M13S") to total seconds.
      * If your DB already stores integer seconds, you can skip this function.
      */
-    private function addToHistory(PlaylistState $currentVideo)
+    private function addToHistory(PlaylistState $currentVideo): void
     {
         $playlistVideo = PlaylistVideo::where('video_id',$currentVideo->video_id)->first();
         History::create([

@@ -2,6 +2,7 @@
 import { config } from './config.js';
 import {hidePopup, showPausePopup} from './popup.js';
 import { loadNextVideo } from './videoLoader.js';
+import {currentUser, getUserIP} from "./../app.js";
 
 export let player;
 export let playing = true;
@@ -81,7 +82,12 @@ async function onPlayerStateChange(event) {
         try {
             player.setVolume(parseInt(storedVolume, 10));
             player.unMute();
-            const response = await fetch('/currentVideo');
+            const ip = await getUserIP();
+            const queryParams = new URLSearchParams({
+                user_id: (currentUser)? currentUser.id : null,
+                ip: ip
+            });
+            const response = await fetch(`/currentVideo?${queryParams.toString()}`);
             const data = await response.json();
             if (data.progress > 0 && playing === false) {
                 player.seekTo(data.progress, true);

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Listener;
 use App\Models\PlaylistState;
 use App\Models\PlaylistVideo;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\Factory;
 use Illuminate\View\View;
@@ -49,9 +52,43 @@ class FMController extends Controller
      * This is for querying the current Video for the synced listening.
      * @return JsonResponse
      */
-    public function currentVideo(): JsonResponse
+    public function currentVideo(Request $request): JsonResponse
     {
         try {
+            deleteInactiveUsers('Listeners');
+            $userId = $request->query('user_id');
+            $listener = Listener::where('user_id', $userId)
+                ->where('ip', $request->query('ip'))
+                ->first();
+
+            if ($listener) {
+                $inactiveSeconds = $listener->updated_at->diffInSeconds(now());
+                if ($inactiveSeconds > 15) {
+                    // Delete the listener if inactive for more than 15 seconds
+                    $listener->delete();
+                    $listening_time = 0;
+                } else {
+                    // Calculate new listening time:
+                    // Add the time from the last update until now to the existing listening_time.
+                    $elapsedSinceLastUpdate = $listener->updated_at->diffInSeconds(now());
+                    $listening_time = $listener->listening_time + $elapsedSinceLastUpdate;
+                }
+            } else {
+                $listening_time = 0;
+            }
+
+            // Then update or create the record
+            Listener::updateOrCreate(
+                [
+                    'ip' => $request->query('ip'),
+                ],
+                [
+                    'user_id' => $userId ?? null,
+                    'listening_time' => $listening_time,
+                    // updated_at will automatically be set to now() if you save the model,
+                ]
+            );
+
             $playlistState = PlaylistState::first();
             $playlistVideo = PlaylistVideo::where('video_id', $playlistState->video_id)->first();
 

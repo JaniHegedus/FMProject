@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ChatUser;
 use App\Models\Message;
 use App\Models\User;
 use Carbon\Carbon;
@@ -27,8 +28,41 @@ class MessageController extends Controller
      * Returns all messages.
      * @return JsonResponse
      */
-    public function getAllMessages(){
+    public function getAllMessages(Request $request){
         try {
+            deleteInactiveUsers('ChatUsers');
+            $userId = $request->query('user_id');
+            $listener = ChatUser::where('user_id', $userId)
+                ->where('ip', $request->query('ip'))
+                ->first();
+
+            if ($listener) {
+                $inactiveSeconds = $listener->updated_at->diffInSeconds(now());
+                if ($inactiveSeconds > 15) {
+                    // Delete the listener if inactive for more than 15 seconds
+                    $listener->delete();
+                    $chat_time = 0;
+                } else {
+                    // Calculate new listening time:
+                    // Add the time from the last update until now to the existing listening_time.
+                    $elapsedSinceLastUpdate =$listener->updated_at->diffInSeconds(now());
+                    $chat_time = $listener->chat_time + $elapsedSinceLastUpdate;
+                }
+            } else {
+                $chat_time = 0;
+            }
+
+            // Then update or create the record
+            ChatUser::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'ip' => $request->query('ip'),
+                ],
+                [
+                    'chat_time' => $chat_time,
+                    // updated_at will automatically be set to now() if you save the model,
+                ]
+            );
             $messages = Message::get();
             return $this->returnMessages($messages);
         }catch (Exception $e){
@@ -42,10 +76,42 @@ class MessageController extends Controller
      * @param $endDate
      * @return JsonResponse
      */
-    public function getMessagesBetween($startDate, $endDate = null){
+    public function getMessagesBetween(Request $request,$startDate, $endDate = null){
         if(!$endDate) $endDate = Carbon::now();
         try {
-            Log::info($startDate);
+            deleteInactiveUsers('ChatUsers');
+            $userId = $request->query('user_id');
+            $listener = ChatUser::where('user_id', $userId)
+                ->where('ip', $request->query('ip'))
+                ->first();
+
+            if ($listener) {
+                $inactiveSeconds = $listener->updated_at->diffInSeconds(now());
+                if ($inactiveSeconds > 15) {
+                    // Delete the listener if inactive for more than 15 seconds
+                    $listener->delete();
+                    $chat_time = 0;
+                } else {
+                    // Calculate new listening time:
+                    // Add the time from the last update until now to the existing listening_time.
+                    $elapsedSinceLastUpdate =$listener->updated_at->diffInSeconds(now());
+                    $chat_time = $listener->chat_time + $elapsedSinceLastUpdate;
+                }
+            } else {
+                $chat_time = 0;
+            }
+
+            // Then update or create the record
+            ChatUser::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'ip' => $request->query('ip'),
+                ],
+                [
+                    'chat_time' => $chat_time,
+                    // updated_at will automatically be set to now() if you save the model,
+                ]
+            );
             $messages = Message::whereBetween('created_at',[$startDate, $endDate])->get();
             return $this->returnMessages($messages);
         }catch (Exception $e){
@@ -92,7 +158,7 @@ class MessageController extends Controller
         if(!$endDate) $endDate = Carbon::now();
         try {
             $messages = Message::whereBetween('created_at',[$startDate, $endDate])->get();
-            return response()->json(['messagesCount'=>count($messages)]);
+            return response()->json(['messagesCount' => count($messages)]);
         }catch (Exception $e){
             return returnErrorJSON($e);
         }

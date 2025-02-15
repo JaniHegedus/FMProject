@@ -1,0 +1,44 @@
+/* Base styling for the count elements as buttons */
+.listeners-count,
+.chatuser-count {
+    font-family: 'Roboto', sans-serif;
+    background-color: #222;       /* Dark background */
+    color: #eee;
+    padding: 10px 16px;           /* Increased padding for a button-like feel */
+    border: 1px solid #444;       /* Subtle border */
+    border-radius: 8px;
+    display: inline-block;
+    margin: 5px;
+    font-size: 14px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    cursor: pointer;              /* Indicates interactivity */
+    text-align: center;
+}
+
+/* Hover state: slightly brighten the background */
+.listeners-count:hover,
+.chatuser-count:hover {
+    background-color: #333;
+}
+
+/* Active state: simulate a button press */
+.listeners-count:active,
+.chatuser-count:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Focus state: add an outline for accessibility */
+.listeners-count:focus,
+.chatuser-count:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(100, 150, 250, 0.5);
+}
+
+/* Styling numeric count differently if wrapped in a span */
+.listeners-count .value,
+.chatuser-count .value {
+    font-weight: bold;
+    color: #4CAF50; /* A pop of color for the count */
+}

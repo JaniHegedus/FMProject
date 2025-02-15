@@ -1,13 +1,14 @@
-import {token, currentUser,pageOpenTimeCarbon} from "../app.js";
+import {token, currentUser, pageOpenTimeCarbon, getUserIP} from "../app.js";
+import {fetchChatUsersAndShowPopup} from "./usersList.js";
 
 export let MessagesCount = localStorage.getItem('MessagesCount') ?? 0;
 export const chatPopup = document.createElement('div');
+export const chatContainer = document.createElement('div');
 const badge = document.createElement('span');
 document.addEventListener('DOMContentLoaded', function() {
     let messageRefreshInterval;
 
     // Create the container for the site logo and CHAT button
-    const chatContainer = document.createElement('div');
     chatContainer.id = 'chat-container';
 
     // Create the site logo element
@@ -43,11 +44,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatTitle = document.createElement('span');
     chatTitle.textContent = 'Chat';
     chatHeader.appendChild(chatTitle);
+
+    const chatUsersCount = document.createElement('div');
+    chatUsersCount.className ='chatuser-count';
+    chatUsersCount.style.display = 'none';
+    chatUsersCount.addEventListener('click', function(){
+        fetchChatUsersAndShowPopup('chat');
+    });
+    chatHeader.appendChild(chatUsersCount);
+
     const closeButton = document.createElement('button');
     closeButton.textContent = 'X'; // using a multiplication sign for a nicer look
     closeButton.className = 'close-button';
     closeButton.addEventListener('click', toggleChat);
     chatHeader.appendChild(closeButton);
+
     chatPopup.appendChild(chatHeader);
 
 
@@ -102,8 +113,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Fetch messages from the server
-    function loadMessages(forceUpdate = false) {
-        fetch(`/messages/${encodeURIComponent(pageOpenTimeCarbon)}`)
+    async function loadMessages(forceUpdate = false) {
+        const ip = await getUserIP();
+        const queryParams = new URLSearchParams({
+            user_id: (currentUser) ? currentUser.id : null,
+            ip: ip
+        });
+
+        fetch(`/messages/${encodeURIComponent(pageOpenTimeCarbon)}?${queryParams.toString()}`)
             .then(response => response.json())
             .then(data => {
                 // Check if user is scrolled to the bottom (within 30px threshold)
@@ -116,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatMessages.innerHTML = '';
                 if (!data.empty) {
                     MessagesCount = data.entries.length;
-                    localStorage.setItem('MessagesCount',MessagesCount);
+                    localStorage.setItem('MessagesCount', MessagesCount);
                     data.entries.forEach(message => {
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'chat-message';
@@ -143,14 +160,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         chatMessages.appendChild(messageDiv);
                     });
                 } else {
-                    postMessage((currentUser ? currentUser.name : 'Anonymous')+' joined the chatroom!')
+                    postMessage((currentUser ? currentUser.name : 'Anonymous') + ' joined the chatroom!')
                 }
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             })
             .catch(error => console.error('Error fetching messages:', error));
-
-        // Function to update the badge on the chat button
-
+        fetch(`/chatusers-count`)
+            .then(response => response.json())
+            .then(data => {
+                if(!data.empty){
+                    chatUsersCount.textContent = (data.chatUserCount)? 'Users in chat: '+data.chatUserCount : '';
+                    chatUsersCount.style.display = 'block';
+                }else{
+                    chatUsersCount.style.display = 'none';
+                }
+            })
     }
 
     // Post a new message using the /send-message endpoint

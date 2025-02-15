@@ -4,6 +4,8 @@
  * Convert an ISO 8601 duration (e.g., "PT4M13S") to total seconds.
  */
 
+use App\Models\ChatUser;
+use App\Models\Listener;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -82,4 +84,35 @@ function returnJSONErrorMessage($message, int $code = 500): JsonResponse
     return response()->json([
         'error' => $message,
     ], $code);
+}
+/**
+ * @param $type
+ * @return void
+ */
+function deleteInactiveUsers($type): bool
+{
+    $users = [];
+    switch ($type) {
+        case 'ChatUsers':
+            $users = ChatUser::all();
+            break;
+        case 'Listeners':
+            $users = Listener::all();
+            break;
+        default:
+            break;
+    }
+    if(!$users->isEmpty()) {
+        foreach ($users as $user) {
+            if($user->updated_at->diffInSeconds(now()) > 15){
+                try{
+                    $user->delete();
+                }catch(Exception $e){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
 }

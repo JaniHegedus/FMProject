@@ -1,10 +1,17 @@
 // videoLoader.js
 import {player, playing, currentVideoId, updateCurrentVideoId} from './player.js';
+import {currentUser,getUserIP} from "./../app.js";
 
 export async function loadNextVideo() {
   try {
-    const response = await fetch('/currentVideo');
-    const data = await response.json();
+      const ip = await getUserIP();
+      const queryParams = new URLSearchParams({
+          user_id: (currentUser)? currentUser.id : null,
+          ip: ip
+      });
+      console.info(currentUser);
+      const response = await fetch(`/currentVideo?${queryParams.toString()}`);
+      const data = await response.json();
 
     if (data.error) {
       console.error("Error fetching next video:", data.error);
@@ -30,18 +37,23 @@ export async function loadNextVideo() {
 export async function checkForNewVideo() {
   try {
     if (playing) {
-      const response = await fetch('/currentVideo');
-      const data = await response.json();
+        const ip = await getUserIP();
+        const queryParams = new URLSearchParams({
+            user_id: (currentUser)? currentUser.id : null,
+            ip: ip
+        });
+        const response = await fetch(`/currentVideo?${queryParams.toString()}`);
+        const data = await response.json();
 
-      if (data.error) {
-        console.error("Error fetching current video:", data.error);
-        return;
-      }
+        if (data.error) {
+            console.error("Error fetching current video:", data.error);
+            return;
+        }
 
-      if (data.video_id !== currentVideoId) {
-        console.log("New video detected:", data.video_id);
-        await loadNextVideo();
-      }
+        if (data.video_id !== currentVideoId) {
+            console.log("New video detected:", data.video_id);
+            await loadNextVideo();
+        }
     }
     setTimeout(() => checkForNewVideo(), 5000);
   } catch (error) {

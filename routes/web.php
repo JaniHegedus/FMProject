@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatUserController;
 use App\Http\Controllers\FMController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\ListenerController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PoolController;
 use App\Http\Controllers\SearchController;
@@ -39,3 +41,11 @@ Route::get('/all-messages', [MessageController::class, 'getAllMessages']);
 Route::get('/messages/{startDate}/{endDate?}', [MessageController::class, 'getMessagesBetween']);
 Route::post('/send-message', [MessageController::class, 'sendMessage']);
 Route::get('/messages-count/{startDate}/{endDate?}', [MessageController::class, 'messagesCount']);
+
+#Active Listeners
+Route::get('/listeners',[ListenerController::class, 'getAllListeners']);
+Route::get('/listeners-count',[ListenerController::class, 'getListenerCount']);
+
+#Active Chat Users
+Route::get('/chatusers',[ChatUserController::class, 'getAllChatUsers']);
+Route::get('/chatusers-count',[ChatUserController::class, 'getChatUsersCount']);

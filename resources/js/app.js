@@ -3,6 +3,7 @@ import './bootstrap'; // Assumes you have a bootstrap file to initialize your ap
 import {checkForNewVideo} from './components/videoLoader.js';
 import { checkForNewPool } from './components/pool/poolStatusChecker.js';
 import {updateBadge, MessagesCount, chatPopup} from './components/chat.js';
+import {checkListenerCount} from './components/listeners.js';
 
 export const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 export let currentUser = null;
@@ -20,6 +21,7 @@ export const pageOpenTimeCarbon = sessionStorage.getItem('session_start') || (()
 checkForNewVideo().then();
 checkForNewPool();
 checkfornewMessages();
+checkListenerCount();
 export async function fetchLoggedInUser() {
     try {
         const response = await fetch('/user', {
@@ -141,4 +143,9 @@ function checkfornewMessages(){
         })
         .catch(error => console.error('Error fetching messages:', error));
     setTimeout(() => checkfornewMessages(), 5000);
+}
+export async function getUserIP() {
+    const response = await fetch('https://api.ipify.org/?format=json');
+    const data = await response.json();
+    return data.ip;
 }

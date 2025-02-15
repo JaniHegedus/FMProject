@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (chatPopup.style.display === 'none' || chatPopup.style.display === '') {
             chatPopup.style.display = 'flex';
             loadMessages(true); // Force update when opening chat
-            messageRefreshInterval = setInterval(() => loadMessages(false), 5000);
+            messageRefreshInterval = setInterval(() => loadMessages(false), 1000);
         } else {
             chatPopup.style.display = 'none';
             clearInterval(messageRefreshInterval);

@@ -140,5 +140,5 @@ function checkfornewMessages(){
             currentMessagesCount = Number(data.messagesCount);
         })
         .catch(error => console.error('Error fetching messages:', error));
-    setTimeout(() => checkfornewMessages(), 1000);
+    setTimeout(() => checkfornewMessages(), 5000);
 }

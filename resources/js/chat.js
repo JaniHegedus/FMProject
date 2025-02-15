@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         chatMessages.appendChild(messageDiv);
                     });
                 } else {
-                    postMessage((currentUser.name ?? 'Anonymous')+' joined the chatroom!')
+                    postMessage((currentUser ? currentUser.name : 'Anonymous')+' joined the chatroom!')
                 }
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             })

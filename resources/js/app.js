@@ -2,13 +2,12 @@
 import './bootstrap'; // Assumes you have a bootstrap file to initialize your app.
 import {checkForNewVideo} from './components/videoLoader.js';
 import { checkForNewPool } from './components/pool/poolStatusChecker.js';
+import {updateBadge, MessagesCount, chatPopup} from './components/chat.js';
 
-// Kick off the periodic check for new video data.
-checkForNewVideo();
-checkForNewPool();
 export const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 export let currentUser = null;
 const pageOpenTime = new Date();
+let currentMessagesCount = 0;
 
 // Check if a session start is already stored, otherwise set a new one.
 export const pageOpenTimeCarbon = sessionStorage.getItem('session_start') || (() => {
@@ -16,6 +15,11 @@ export const pageOpenTimeCarbon = sessionStorage.getItem('session_start') || (()
     sessionStorage.setItem('session_start', newSession);
     return newSession;
 })();
+
+// Kick off the periodic check for new video data.
+checkForNewVideo().then();
+checkForNewPool();
+checkfornewMessages();
 export async function fetchLoggedInUser() {
     try {
         const response = await fetch('/user', {
@@ -119,4 +123,22 @@ function formatToCarbon(date) {
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+function checkfornewMessages(){
+    let difference = currentMessagesCount - MessagesCount;
+    // In the loadMessages function, after updating chatMessages:
+    if (chatPopup.style.display === 'none' || chatPopup.style.display === '') {
+        updateBadge(difference);
+    } else {
+        // If the chat is open, mark messages as read.
+        currentMessagesCount = MessagesCount;
+        updateBadge(0);
+    }
+    fetch(`/messages-count/${encodeURIComponent(pageOpenTimeCarbon)}`)
+        .then(response => response.json())
+        .then(data => {
+            currentMessagesCount = Number(data.messagesCount);
+        })
+        .catch(error => console.error('Error fetching messages:', error));
+    setTimeout(() => checkfornewMessages(), 1000);
 }

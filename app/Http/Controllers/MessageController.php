@@ -15,6 +15,7 @@ use Log;
 class MessageController extends Controller
 {
     /**
+     * Returns all the Message Objects currently in the database.
      * @return Message[]|Collection|_IH_Message_C
      */
     public function index()
@@ -23,6 +24,7 @@ class MessageController extends Controller
     }
 
     /**
+     * Returns all messages.
      * @return JsonResponse
      */
     public function getAllMessages(){
@@ -35,6 +37,7 @@ class MessageController extends Controller
     }
 
     /**
+     * Returns all messages filtered by the created_at column.
      * @param $startDate
      * @param $endDate
      * @return JsonResponse
@@ -51,6 +54,7 @@ class MessageController extends Controller
     }
 
     /**
+     * Saves a message in the database.
      * @param Request $request
      * @return JsonResponse
      */
@@ -78,6 +82,27 @@ class MessageController extends Controller
         }
     }
 
+    /**
+     * Returns the current number of chats from a date to a date.
+     * @param $startDate
+     * @param $endDate
+     * @return JsonResponse
+     */
+    public function messagesCount($startDate, $endDate = null){
+        if(!$endDate) $endDate = Carbon::now();
+        try {
+            $messages = Message::whereBetween('created_at',[$startDate, $endDate])->get();
+            return response()->json(['messagesCount'=>count($messages)]);
+        }catch (Exception $e){
+            return returnErrorJSON($e);
+        }
+    }
+
+    /**
+     * Stores a new Message.
+     * @param Request $request
+     * @return Message
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -98,6 +123,7 @@ class MessageController extends Controller
     }
 
     /**
+     * Updates a DB entry for the Messages.
      * @param Request $request
      * @param Message $message
      * @return Message

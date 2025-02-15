@@ -38,3 +38,4 @@ Route::get('/history/{startDate}/{endDate?}', [HistoryController::class, 'getHis
 Route::get('/all-messages', [MessageController::class, 'getAllMessages']);
 Route::get('/messages/{startDate}/{endDate?}', [MessageController::class, 'getMessagesBetween']);
 Route::post('/send-message', [MessageController::class, 'sendMessage']);
+Route::get('/messages-count/{startDate}/{endDate?}', [MessageController::class, 'messagesCount']);

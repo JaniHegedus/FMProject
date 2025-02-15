@@ -1,5 +1,8 @@
-import {token, currentUser,pageOpenTimeCarbon} from "./app.js";
+import {token, currentUser,pageOpenTimeCarbon} from "../app.js";
 
+export let MessagesCount = localStorage.getItem('MessagesCount') ?? 0;
+export const chatPopup = document.createElement('div');
+const badge = document.createElement('span');
 document.addEventListener('DOMContentLoaded', function() {
     let messageRefreshInterval;
 
@@ -18,14 +21,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatButton = document.createElement('button');
     chatButton.id = 'chat-button';
     chatButton.textContent = 'CHAT';
+    chatButton.style.position = 'relative';  // Ensure badge is positioned relative to button
     chatButton.addEventListener('click', toggleChat);
+
+    badge.className = 'unread-badge';
+    badge.style.display = 'none'; // Initially hidden
+
+    chatButton.appendChild(badge);
     chatContainer.appendChild(chatButton);
+
 
     // Append the chat container to the document body
     document.body.appendChild(chatContainer);
 
     // Create the chat popup element
-    const chatPopup = document.createElement('div');
     chatPopup.id = 'chat-popup';
 
     // Create the chat header with title and close button
@@ -106,6 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 chatMessages.innerHTML = '';
                 if (!data.empty) {
+                    MessagesCount = data.entries.length;
+                    localStorage.setItem('MessagesCount',MessagesCount);
                     data.entries.forEach(message => {
                         const messageDiv = document.createElement('div');
                         messageDiv.className = 'chat-message';
@@ -137,6 +148,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             })
             .catch(error => console.error('Error fetching messages:', error));
+
+        // Function to update the badge on the chat button
+
     }
 
     // Post a new message using the /send-message endpoint
@@ -231,8 +245,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
     // Enable custom resizing on the chat popup
     makeResizable(chatPopup);
 
 });
+export function updateBadge(unread) {
+    switch (true) {
+        case (unread > 99):
+            badge.textContent = '99+';
+            badge.style.display = 'block';
+            break;
+        case (unread > 0):
+            badge.textContent = unread;
+            badge.style.display = 'block';
+            break;
+        default:
+            badge.style.display = 'none';
+    }
+
+}

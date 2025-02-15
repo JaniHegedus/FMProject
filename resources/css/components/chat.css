@@ -201,3 +201,18 @@
 .message-content {
     white-space: pre-wrap;
 }
+.unread-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    display: none;
+    z-index: 15000;
+}
+
+

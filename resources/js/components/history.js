@@ -55,10 +55,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Set the title attribute so that on hover, the description is shown
                         entryDiv.title = entry.video_description || 'No Description';
 
+                        // Format the played_at value using our helper
+                        const formattedPlayedAt = formatPlayedAt(entry.played_at);
+
                         entryDiv.innerHTML = `
-                          <span class="entry-title">${entry.video_title || 'No Title'}</span>
-                          <span class="entry-played">${entry.played_at || ''}</span>
-                        `;
+                                                <span class="entry-title">${entry.video_title || 'No Title'}</span>
+                                                <span class="entry-played">${formattedPlayedAt}</span>
+                                              `;
                         entriesContainer.appendChild(entryDiv);
                     });
                 } else {
@@ -81,4 +84,30 @@ function getYesterdayFormatted() {
     const month = String(yesterday.getMonth() + 1).padStart(2, '0');
     const day = String(yesterday.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+}
+function formatPlayedAt(dateString) {
+    const playedAtDate = new Date(dateString);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const playedDate = new Date(playedAtDate.getFullYear(), playedAtDate.getMonth(), playedAtDate.getDate());
+
+    const hours = String(playedAtDate.getHours()).padStart(2, '0');
+    const minutes = String(playedAtDate.getMinutes()).padStart(2, '0');
+
+    // If played_at is today, return HH:MM
+    if (playedDate.getTime() === today.getTime()) {
+        return `${hours}:${minutes}`;
+    }
+
+    // Check for yesterday
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (playedDate.getTime() === yesterday.getTime()) {
+        return `Yesterday: ${hours}:${minutes}`;
+    }
+
+    // Otherwise, return a compact MM-DD HH:MM format
+    const month = String(playedAtDate.getMonth() + 1).padStart(2, '0');
+    const day = String(playedAtDate.getDate()).padStart(2, '0');
+    return `${month}-${day} ${hours}:${minutes}`;
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FMController;
 use App\Http\Controllers\HistoryController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PoolController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Auth;
@@ -32,3 +33,8 @@ Route::get('/pool-status', [PoolController::class, 'getPoolStatus']);
 #History
 Route::get('/full-history', [HistoryController::class, 'getFullHistory']);
 Route::get('/history/{startDate}/{endDate?}', [HistoryController::class, 'getHistoryBetween']);
+
+#Messages
+Route::get('/all-messages', [MessageController::class, 'getAllMessages']);
+Route::get('/messages/{startDate}/{endDate?}', [MessageController::class, 'getMessagesBetween']);
+Route::post('/send-message', [MessageController::class, 'sendMessage']);

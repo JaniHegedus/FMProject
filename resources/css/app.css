@@ -73,16 +73,6 @@ html, body {
     line-height: 1;
 }
 
-
-#site-logo {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    width: 50px;
-    height: auto;
-    z-index: 999;
-}
-
 #requester {
     z-index: 13;
     position: fixed;

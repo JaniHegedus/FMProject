@@ -10,6 +10,10 @@ use Illuminate\Http\JsonResponse;
 
 class HistoryController extends Controller
 {
+    public function index()
+    {
+        return History::all();
+    }
     /**
      * Returns a time controlled JSON of the History table entries.
      * @param $startDate
@@ -20,7 +24,6 @@ class HistoryController extends Controller
         if(!$endDate) $endDate = now();
         try {
             $history = History::whereBetween('played_at', [$startDate, $endDate])->get();
-            $this->returnHistory($history);
             return $this->returnHistory($history);
 
         }catch (Exception $e){
@@ -48,7 +51,7 @@ class HistoryController extends Controller
      * @param $history
      * @return JsonResponse
      */
-    private function returnHistory(&$history) : JSONResponse
+    private function returnHistory($history) : JSONResponse
     {
         foreach ($history as $entry) {
             $video = PlaylistVideo::where('id',$entry->playlist_video_id)->first();

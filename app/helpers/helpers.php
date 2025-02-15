@@ -59,7 +59,7 @@ function returnErrorJSON(Exception $e, int $errorCode = 500) : JSONResponse
  */
 function returnEntriesAsJSON($entries, string $emptyMessage): JsonResponse
 {
-    if(empty($entries)) {
+    if($entries->isEmpty()) {
         return response()->json([
             'empty'   => true,
             'message' => $emptyMessage,

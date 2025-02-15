@@ -84,6 +84,5 @@
     <h1 id="video-title">{{ $videoTitle ?? 'No video playing' }}</h1>
     <h2 id="video-start-time">{{ $startTime ?? 'N/A' }}</h2>
 </div>
-<img id="site-logo" src="/assets/radio-icon.webp" alt="JaniHegedus FM"/>
 </body>
 </html>

@@ -6,8 +6,16 @@ import { checkForNewPool } from './components/pool/poolStatusChecker.js';
 // Kick off the periodic check for new video data.
 checkForNewVideo();
 checkForNewPool();
+export const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+export let currentUser = null;
+const pageOpenTime = new Date();
 
-// Fetch the logged in user via AJAX.
+// Check if a session start is already stored, otherwise set a new one.
+export const pageOpenTimeCarbon = sessionStorage.getItem('session_start') || (() => {
+    const newSession = formatToCarbon(pageOpenTime);
+    sessionStorage.setItem('session_start', newSession);
+    return newSession;
+})();
 export async function fetchLoggedInUser() {
     try {
         const response = await fetch('/user', {
@@ -33,7 +41,8 @@ export async function fetchLoggedInUser() {
 // Call the function and update the UI if a user is logged in.
 fetchLoggedInUser().then(user => {
     if (user && user.id) {
-        console.log('Logged in user:', user);
+        //console.log('Logged in user:', user);
+        currentUser = user;
         // For example, update the UI to show the username and a logout link.
         const settingsPanel = document.getElementById('settings-panel');
         if (settingsPanel) {
@@ -55,7 +64,6 @@ fetchLoggedInUser().then(user => {
             logoutLink.addEventListener('click', async (e) => {
                 e.preventDefault();
                 // Send an AJAX logout request
-                const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 try {
                     const logoutResponse = await fetch('/logout', {
                         method: 'POST',
@@ -102,4 +110,13 @@ function showPopup(message, isSuccess = true) {
             popup.remove();
         }, 500);
     }, 3000);
+}
+function formatToCarbon(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }

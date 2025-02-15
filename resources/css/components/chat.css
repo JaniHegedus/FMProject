@@ -1,0 +1,203 @@
+/* chat.css */
+#chat-container {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+}
+
+#site-logo {
+    width: 50px;
+    height: auto;
+}
+
+#chat-button {
+    background: linear-gradient(145deg, #2980b9, #8e44ad);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+#chat-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+#chat-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Outer popup styled like a window; overflow hidden so no native scrollbars appear */
+#chat-popup {
+    position: fixed;
+    bottom: 70px;
+    left: 10px;
+    width: 40vw;
+    height: 40vh;
+    min-width: 300px;
+    min-height: 200px;
+    background: rgba(20, 20, 20, 0.9);
+    color: #fff;
+    border-radius: 20px; /* Increased border radius for a rounder look */
+    z-index: 999;
+    display: none;
+    flex-direction: column;
+    overflow: visible;
+}
+
+/* The inner messages area will handle its own scrolling */
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* Resize handle base styling */
+.resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: transparent;
+    z-index: 1001;
+}
+
+/* Sides */
+.resize-handle.top {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ns-resize;
+}
+.resize-handle.bottom {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ns-resize;
+}
+.resize-handle.left {
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+}
+.resize-handle.right {
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: ew-resize;
+}
+
+/* Corners */
+.resize-handle.top-left {
+    top: -5px;
+    left: -5px;
+    cursor: nwse-resize;
+}
+.resize-handle.top-right {
+    top: -5px;
+    right: -5px;
+    cursor: nesw-resize;
+}
+.resize-handle.bottom-left {
+    bottom: -5px;
+    left: -5px;
+    cursor: nesw-resize;
+}
+.resize-handle.bottom-right {
+    bottom: -5px;
+    right: -5px;
+    cursor: nwse-resize;
+}
+
+.chat-header {
+    padding: 10px;
+    background: #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+
+.chat-message {
+    margin-bottom: 8px;
+}
+
+.message-sender {
+    font-size: 0.8em;
+    color: #2980b9;
+}
+
+.message-timestamp {
+    font-size: 0.8em;
+    color: #ccc;
+}
+
+.chat-input {
+    padding: 10px;
+    display: flex;
+    border-top: 1px solid #555;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 5px;
+    border: none;
+    border-radius: 4px;
+    margin-right: 5px;
+    color: #000;
+}
+
+.chat-input button {
+    padding: 5px 10px;
+    background: linear-gradient(145deg, #2980b9, #8e44ad);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.chat-input button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+.chat-input button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+.close-button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.close-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ddd;
+}
+
+.close-button:focus {
+    outline: none;
+}
+.message-content {
+    white-space: pre-wrap;
+}

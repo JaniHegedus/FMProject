@@ -12,6 +12,10 @@ use App\Models\PlaylistVideo;
 
 class PoolController extends Controller
 {
+    public function index()
+    {
+        return PlayListPool::all();
+    }
     /**
      * This method is for starting a pool, also used to add a song to the pool.
      * @param Request $request

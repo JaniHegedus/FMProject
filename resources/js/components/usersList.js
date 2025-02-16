@@ -1,5 +1,5 @@
 // Function to fetch chat users and show the popup
-export function fetchChatUsersAndShowPopup(type) {
+export function fetchUsersAndShowPopup(type) {
     switch (type){
         case 'chat':
             fetch('/chatusers')
@@ -30,12 +30,12 @@ export function fetchChatUsersAndShowPopup(type) {
                 .then(data => {
                     let content = '';
                     if (data.empty) {
-                        content = '<p>No listeners available.</p>';
+                        content = '<p>No chat users available.</p>';
                     } else {
                         // Assuming each entry contains a "username" field; adjust if needed.
                         content = '<ul style="list-style: none; padding: 0; margin: 0;">';
                         data.entries.forEach(user => {
-                            console.log(user);
+                            //console.log(user);
                             // Replace "username" with the correct property if different.
                             content += `<li style="padding: 5px 0; border-bottom: 1px solid #444;">${user.userName || 'Anonymous'}</li>`;
                         });

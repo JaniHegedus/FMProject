@@ -9,7 +9,7 @@ export async function loadNextVideo() {
           user_id: (currentUser)? currentUser.id : null,
           ip: ip
       });
-      console.info(currentUser);
+      //console.info(currentUser);
       const response = await fetch(`/currentVideo?${queryParams.toString()}`);
       const data = await response.json();
 

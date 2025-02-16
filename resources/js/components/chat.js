@@ -1,5 +1,5 @@
 import {token, currentUser, pageOpenTimeCarbon, getUserIP} from "../app.js";
-import {fetchChatUsersAndShowPopup} from "./usersList.js";
+import {fetchUsersAndShowPopup} from "./usersList.js";
 
 export let MessagesCount = localStorage.getItem('MessagesCount') ?? 0;
 export const chatPopup = document.createElement('div');
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chatUsersCount.className ='chatuser-count';
     chatUsersCount.style.display = 'none';
     chatUsersCount.addEventListener('click', function(){
-        fetchChatUsersAndShowPopup('chat');
+        fetchUsersAndShowPopup('chat');
     });
     chatHeader.appendChild(chatUsersCount);
 

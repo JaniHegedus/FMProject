@@ -23,13 +23,13 @@ class ListenerController extends Controller
         try{
             $listeners = Listener::all();
             foreach ($listeners as $listener) {
+                $user = User::find($listener->user_id);
                 unset($listener->ip);
                 unset($listener->listening_time);
                 unset($listener->created_at);
                 unset($listener->updated_at);
                 unset($listener->id);
                 unset($listener->user_id);
-                $user = User::find($listener->user_id);
                 $listener->userName = $user?->name;
             }
             return returnEntriesAsJSON($listeners,'No-one is listening.');

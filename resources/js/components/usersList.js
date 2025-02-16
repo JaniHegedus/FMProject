@@ -25,7 +25,7 @@ export function fetchUsersAndShowPopup(type) {
                 });
             break;
         case 'listeners':
-            fetch('/chatusers')
+            fetch('/listeners')
                 .then(response => response.json())
                 .then(data => {
                     let content = '';

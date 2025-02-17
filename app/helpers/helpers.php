@@ -95,16 +95,18 @@ function deleteInactiveUsers($type): bool
     switch ($type) {
         case 'ChatUsers':
             $users = ChatUser::all();
+            $interval = 2;
             break;
         case 'Listeners':
             $users = Listener::all();
+            $interval = 5;
             break;
         default:
             break;
     }
     if(!$users->isEmpty()) {
         foreach ($users as $user) {
-            if($user->updated_at->diffInSeconds(now()) > 15){
+            if($user->updated_at->diffInSeconds(now()) > $interval){
                 try{
                     $user->delete();
                 }catch(Exception $e){

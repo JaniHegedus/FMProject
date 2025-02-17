@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 use Illuminate\View\Factory;
 use Illuminate\View\View;
 
@@ -76,16 +77,16 @@ class FMController extends Controller
             } else {
                 $listening_time = 0;
             }
-
+            $sessionToken = Str::uuid();
             $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             Listener::updateOrCreate(
                 [
-                    'ip' => $request->query('ip'),
-                    'fingerprint' => $fingerprint,
+                    'fingerprint' => $sessionToken,
                 ],
                 [
                     'user_id' => $userId ?? null,
+                    'ip' => $request->query('ip'),
                     'listening_time' => $listening_time,
                     // updated_at will automatically be set to now() if you save the model,
                 ]

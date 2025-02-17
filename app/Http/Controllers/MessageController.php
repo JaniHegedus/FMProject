@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use LaravelIdea\Helper\App\Models\_IH_Message_C;
 use Log;
 
@@ -52,15 +53,16 @@ class MessageController extends Controller
                 $chat_time = 0;
             }
 
+            $sessionToken = Str::uuid();
             $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             ChatUser::updateOrCreate(
                 [
-                    'user_id' => $userId,
-                    'ip' => $request->query('ip'),
-                    'fingerprint' => $fingerprint,
+                    'fingerprint' => $sessionToken,
                 ],
                 [
+                    'user_id' => $userId ?? null,
+                    'ip' => $request->query('ip'),
                     'chat_time' => $chat_time,
                     // updated_at will automatically be set to now() if you save the model,
                 ]

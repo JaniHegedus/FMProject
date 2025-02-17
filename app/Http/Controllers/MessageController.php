@@ -7,19 +7,12 @@ use App\Models\Message;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use LaravelIdea\Helper\App\Models\_IH_Message_C;
 use Log;
 
 class MessageController extends Controller
 {
-    /**
-     * Returns all the Message Objects currently in the database.
-     * @return Message[]|Collection|_IH_Message_C
-     */
     public function index()
     {
         return Message::all();
@@ -53,7 +46,7 @@ class MessageController extends Controller
                 $chat_time = 0;
             }
 
-            $sessionToken = Str::uuid();
+            $sessionToken = csrf_token();
             $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             ChatUser::updateOrCreate(
@@ -105,7 +98,7 @@ class MessageController extends Controller
                 $chat_time = 0;
             }
 
-            $sessionToken = Str::uuid();
+            $sessionToken =csrf_token();
             $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             ChatUser::updateOrCreate(

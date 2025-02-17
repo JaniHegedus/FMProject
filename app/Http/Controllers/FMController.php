@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Listener;
 use App\Models\PlaylistState;
 use App\Models\PlaylistVideo;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Str;
 use Illuminate\View\Factory;
 use Illuminate\View\View;
 
@@ -77,7 +75,7 @@ class FMController extends Controller
             } else {
                 $listening_time = 0;
             }
-            $sessionToken = Str::uuid();
+            $sessionToken = csrf_token();
             $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             Listener::updateOrCreate(

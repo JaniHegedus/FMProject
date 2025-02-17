@@ -52,11 +52,13 @@ class MessageController extends Controller
                 $chat_time = 0;
             }
 
+            $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             ChatUser::updateOrCreate(
                 [
                     'user_id' => $userId,
                     'ip' => $request->query('ip'),
+                    'fingerprint' => $fingerprint,
                 ],
                 [
                     'chat_time' => $chat_time,
@@ -101,10 +103,12 @@ class MessageController extends Controller
                 $chat_time = 0;
             }
 
+            $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             ChatUser::updateOrCreate(
                 [
                     'user_id' => $userId,
+                    'fingerprint' => $fingerprint,
                     'ip' => $request->query('ip'),
                 ],
                 [

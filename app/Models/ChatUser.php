@@ -13,6 +13,7 @@ class ChatUser extends Model
     protected $fillable = [
         'user_id',
         'ip',
+        'fingerprint',
         'chat_time',
     ];
 

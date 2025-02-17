@@ -13,6 +13,7 @@ class Listener extends Model
     protected $fillable = [
         'user_id',
         'ip',
+        'fingerprint',
         'listening_time',
     ];
 

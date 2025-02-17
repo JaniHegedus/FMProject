@@ -10,7 +10,8 @@ return new class extends Migration {
         Schema::create('listeners', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable();
-            $table->string('ip')->unique();
+            $table->string('ip');
+            $table->string('fingerprint')->unique(); // Unique identifier
             $table->unsignedInteger('listening_time')->default(0); // in seconds
             $table->timestamps();
         });

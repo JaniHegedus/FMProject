@@ -55,6 +55,7 @@ class ChatUserController extends Controller
         $data = $request->validate([
             'user_id' => ['required', 'exists:users'],
             'ip' => ['required'],
+            'fingerprint' => ['required'],
         ]);
 
         return ChatUser::create($data);

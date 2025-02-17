@@ -95,7 +95,7 @@ function deleteInactiveUsers($type): bool
     switch ($type) {
         case 'ChatUsers':
             $users = ChatUser::all();
-            $interval = 3;
+            $interval = 2;
             break;
         case 'Listeners':
             $users = Listener::all();

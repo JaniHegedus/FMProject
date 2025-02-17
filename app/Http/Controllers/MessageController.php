@@ -105,15 +105,16 @@ class MessageController extends Controller
                 $chat_time = 0;
             }
 
+            $sessionToken = Str::uuid();
             $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             ChatUser::updateOrCreate(
                 [
-                    'user_id' => $userId,
-                    'fingerprint' => $fingerprint,
-                    'ip' => $request->query('ip'),
+                    'fingerprint' => $sessionToken,
                 ],
                 [
+                    'user_id' => $userId ?? null,
+                    'ip' => $request->query('ip'),
                     'chat_time' => $chat_time,
                     // updated_at will automatically be set to now() if you save the model,
                 ]

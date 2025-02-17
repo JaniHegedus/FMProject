@@ -77,10 +77,12 @@ class FMController extends Controller
                 $listening_time = 0;
             }
 
+            $fingerprint = hash('sha256', $request->query('ip') . request()->header('User-Agent'));
             // Then update or create the record
             Listener::updateOrCreate(
                 [
                     'ip' => $request->query('ip'),
+                    'fingerprint' => $fingerprint,
                 ],
                 [
                     'user_id' => $userId ?? null,

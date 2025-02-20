@@ -7,6 +7,7 @@ use App\Models\Listener;
 use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use LaravelIdea\Helper\App\Models\_IH_Listener_C;
 
@@ -19,6 +20,10 @@ class ListenerController extends Controller
     {
         return Listener::all();
     }
+
+    /**
+     * @return JsonResponse
+     */
     public function getAllListeners(){
         try{
             $listeners = Listener::all();
@@ -37,6 +42,10 @@ class ListenerController extends Controller
             return returnErrorJSON($e);
         }
     }
+
+    /**
+     * @return JsonResponse
+     */
     public function getListenerCount()
     {
         try{

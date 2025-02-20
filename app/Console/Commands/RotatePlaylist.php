@@ -149,62 +149,8 @@ class RotatePlaylist extends Command
             $this->info('Waiting for current video to finish. Waiting: '.$currentRemaining.' seconds...');
             sleep($currentRemaining);
             $this->rotatePlaylistFromDb();
-            $this->addToHistory($currentVideo);
             return $currentVideo->duration;
-        }else {
-            $poolwinner = PlaylistPool::where('created_at', '<=', Carbon::now()->subMinutes(10))
-                ->orderBy('votes', 'desc')
-                ->first();
-
-            if($poolwinner){
-                $video_id = $poolwinner->video_id;
-                $playlist_video = PlaylistVideo::where('video_id',$video_id)->first();
-                $video_details = VideoData::where('playlist_video_id',$playlist_video->id)->first();
-                $this->info('Pool winner found! Playing: '.$playlist_video->title);
-                $requester = User::where('id',$poolwinner->created_by)->first()->name ?? 'Pool';
-                $duration = convertDurationToSeconds($video_details->duration);
-                PlaylistState::updateOrInsert(
-                    ['id' => 1],  // or some other logic if you have multiple states
-                    [
-                        'video_id'   => $video_id,
-                        'start_time' => Carbon::now(),
-                        'duration'   => $duration,
-                        'updated_at' => Carbon::now(),
-                        'requested_by' => $requester
-                    ]
-                );
-                PlayListPool::truncate();
-                $this->addToHistory($currentVideo);
-                return $duration;
-            }
-            else{
-                PlaylistState::updateOrInsert(
-                    ['id' => 1],  // or some other logic if you have multiple states
-                    [
-                        'video_id'   => $nextVideo['id'],
-                        'start_time' => Carbon::now(),
-                        'duration'   => $nextVideo['duration'],
-                        'updated_at' => Carbon::now(),
-                        'requested_by' => $requester
-                    ]
-                );
-                $this->info("Rotated -> Next video: {$nextVideo['id']} (Duration: {$nextVideo['duration']}s)");
-                $this->addToHistory($currentVideo);
-                return $nextVideo['duration'];
-            }
-        }
-    }
-
-    /**
-     * Convert an ISO 8601 duration (e.g. "PT4M13S") to total seconds.
-     * If your DB already stores integer seconds, you can skip this function.
-     */
-    private function addToHistory(PlaylistState $currentVideo): void
-    {
-        $playlistVideo = PlaylistVideo::where('video_id',$currentVideo->video_id)->first();
-        History::create([
-            'playlist_video_id' => $playlistVideo->id,
-            'played_at' => $currentVideo->start_time
-        ]);
+        }else
+            return changeSong($currentVideo, $requester, $nextVideo);
     }
 }

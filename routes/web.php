@@ -8,6 +8,7 @@ use App\Http\Controllers\ListenerController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PoolController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\VoteToSkipController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -49,3 +50,7 @@ Route::get('/listeners-count',[ListenerController::class, 'getListenerCount']);
 #Active Chat Users
 Route::get('/chatusers',[ChatUserController::class, 'getAllChatUsers']);
 Route::get('/chatusers-count',[ChatUserController::class, 'getChatUsersCount']);
+
+#Skip
+Route::get('/vote-to-skip',[VoteToSkipController::class, 'voteSkip']);
+Route::get('/skippers-count',[VoteToSkipController::class, 'getSkippersCount']);

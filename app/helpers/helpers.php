@@ -5,7 +5,15 @@
  */
 
 use App\Models\ChatUser;
+use App\Models\History;
 use App\Models\Listener;
+use App\Models\PlayListPool;
+use App\Models\PlaylistState;
+use App\Models\PlaylistVideo;
+use App\Models\User;
+use App\Models\VideoData;
+use App\Models\VoteToSkip;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -117,4 +125,58 @@ function deleteInactiveUsers($type): bool
         return true;
     }
     return false;
+}
+function changeSong($currentVideo, $requester, $nextVideo){
+    VoteToSkip::truncate();
+    $poolwinner = PlaylistPool::where('created_at', '<=', Carbon::now()->subMinutes(10))
+        ->orderBy('votes', 'desc')
+        ->first();
+
+    if($poolwinner){
+        $video_id = $poolwinner->video_id;
+        $playlist_video = PlaylistVideo::where('video_id',$video_id)->first();
+        $video_details = VideoData::where('playlist_video_id',$playlist_video->id)->first();
+        $requester = User::where('id',$poolwinner->created_by)->first()->name ?? 'Pool';
+        $duration = convertDurationToSeconds($video_details->duration);
+        PlaylistState::updateOrInsert(
+            ['id' => 1],  // or some other logic if you have multiple states
+            [
+                'video_id'   => $video_id,
+                'start_time' => Carbon::now(),
+                'duration'   => $duration,
+                'updated_at' => Carbon::now(),
+                'requested_by' => $requester
+            ]
+        );
+        PlayListPool::truncate();
+        addToHistory($currentVideo);
+        return $duration;
+    }
+    else{
+        PlaylistState::updateOrInsert(
+            ['id' => 1],  // or some other logic if you have multiple states
+            [
+                'video_id'   => $nextVideo['id'],
+                'start_time' => Carbon::now(),
+                'duration'   => $nextVideo['duration'],
+                'updated_at' => Carbon::now(),
+                'requested_by' => $requester
+            ]
+        );
+        addToHistory($currentVideo);
+        return $nextVideo['duration'];
+    }
+}
+
+/**
+ * @param PlaylistState $currentVideo
+ * @return void
+ */
+function addToHistory(PlaylistState $currentVideo): void
+{
+    $playlistVideo = PlaylistVideo::where('video_id',$currentVideo->video_id)->first();
+    History::create([
+        'playlist_video_id' => $playlistVideo->id,
+        'played_at' => $currentVideo->start_time
+    ]);
 }

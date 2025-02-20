@@ -30,7 +30,7 @@ export function fetchUsersAndShowPopup(type) {
                 .then(data => {
                     let content = '';
                     if (data.empty) {
-                        content = '<p>No chat users available.</p>';
+                        content = '<p>No listeners available.</p>';
                     } else {
                         // Assuming each entry contains a "username" field; adjust if needed.
                         content = '<ul style="list-style: none; padding: 0; margin: 0;">';

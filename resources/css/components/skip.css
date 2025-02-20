@@ -1,0 +1,30 @@
+.skip-btn {
+    background: linear-gradient(135deg, #ff6b97, #1aff00);
+    color: #000000;
+    font-size: 16px;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 5%;
+}
+
+.skip-btn:hover {
+    background: linear-gradient(135deg, #000DFF, #6B73FF);
+    transform: translateY(-2px);
+}
+/* Badge styling */
+.skip-badge {
+    position: absolute;
+    top: -0.5rem;      /* Adjust vertical alignment */
+    right: -0.5rem;    /* Adjust horizontal alignment */
+    padding: 0.2rem 0.6rem;
+    border-radius: 50%;
+    background-color: #f44336; /* Red background */
+    color: #fff;               /* White text */
+    font-size: 0.75rem;
+    font-weight: bold;
+    pointer-events: none;      /* Ensures clicks go through to the button */
+}

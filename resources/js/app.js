@@ -4,6 +4,7 @@ import {checkForNewVideo} from './components/videoLoader.js';
 import { checkForNewPool } from './components/pool/poolStatusChecker.js';
 import {updateBadge, MessagesCount, chatPopup} from './components/chat.js';
 import {checkListenerCount} from './components/listeners.js';
+import { updateSkipBadge } from './components/voteToSkip.js';
 
 export const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 export let currentUser = null;
@@ -22,6 +23,7 @@ checkForNewVideo().then();
 checkForNewPool();
 checkfornewMessages();
 checkListenerCount();
+updateSkipBadge();
 export async function fetchLoggedInUser() {
     try {
         const response = await fetch('/user', {

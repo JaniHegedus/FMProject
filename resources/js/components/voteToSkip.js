@@ -62,5 +62,5 @@ export async function updateSkipBadge() {
     } catch (error) {
         console.error('Error fetching skip count:', error);
     }
-    setInterval(updateSkipBadge, 5000);
+    setTimeout(updateSkipBadge, 5000);
 }
